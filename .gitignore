@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.vscode/
+BaseModel/SSD/datasets/RDD2020_filtered/*
+BaseModel/SSD/outputs/rdd2020/tf_logs/*
+BaseModel/SSD/datasets/rdd2020.zip
+BaseModel/SSD/outputs/rdd2020/log.txt

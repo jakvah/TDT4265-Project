@@ -1,9 +1,9 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'basic'
+        NAME: 'resnet'
         PRETRAINED: False
-        OUT_CHANNELS: [128, 256, 128, 128, 64, 64]
+        OUT_CHANNELS: [150, 150, 150, 75, 75, 38, 19, 10]
         INPUT_CHANNELS: 3
 INPUT:
     IMAGE_SIZE: [300, 300]

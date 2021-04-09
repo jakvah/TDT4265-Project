@@ -34,6 +34,15 @@ def make_data_loader(cfg, is_train=True, max_iter=None, start_iter=0):
         cfg.DATASET_DIR,
         dataset_list, transform=train_transform,
         target_transform=target_transform, is_train=is_train)
+    # Adds mirrored dataset 
+    #================================================================
+    if is_train:
+        mirror_transform = build_transforms(cfg, is_train=is_train, mirror=True)   
+        mirror_dataset = build_dataset(cfg.DATASET_DIR,
+            dataset_list, transform=mirror_transform,
+            target_transform=target_transform, is_train=is_train))
+        datasets = ConcatDataset([datasets, mirror_dataset])
+    #================================================================
 
     shuffle = is_train
 

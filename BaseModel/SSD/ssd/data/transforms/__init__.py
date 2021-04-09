@@ -3,15 +3,26 @@ from .target_transform import SSDTargetTransform
 from .transforms import *
 
 
-def build_transforms(cfg, is_train=True):
+def build_transforms(cfg, is_train=True, mirror=True):
     if is_train:
-        transform = [
+        if mirror:
+            transform = [
             ConvertFromInts(),
             ToPercentCoords(),
             Resize(cfg.INPUT.IMAGE_SIZE),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
+            Mirror(),
             ToTensor(),
         ]
+        else:
+            transform = [
+                ConvertFromInts(),
+                ToPercentCoords(),
+                Resize(cfg.INPUT.IMAGE_SIZE),
+                SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
+                ToTensor(),
+            ]
+    
     else:
         transform = [
             Resize(cfg.INPUT.IMAGE_SIZE),

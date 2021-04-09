@@ -272,3 +272,12 @@ class RandomMirror(object):
             boxes = boxes.copy()
             boxes[:, 0::2] = width - boxes[:, 2::-2]
         return image, boxes, classes
+
+class Mirror(object):
+    def __call__(self, image, boxes, classes):
+        _, width, _ = image.shape
+        
+        image = image[:, ::-1]
+        boxes = boxes.copy()
+        boxes[:, 0::2] = width - boxes[:, 2::-2]
+        return image, boxes, classes

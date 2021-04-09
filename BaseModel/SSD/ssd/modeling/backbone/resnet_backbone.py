@@ -58,7 +58,6 @@ class ResNetModel(torch.nn.Module):
             # Feature.shape is (batch, channels, height, width)
             assert feature.shape[1:] == expected_shape, \
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
-        print("Passsed asserts")
         return tuple(out_features)
 
         """The resnet18 layers:

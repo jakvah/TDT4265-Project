@@ -18,4 +18,6 @@ if __name__ == "__main__":
         # print("output_channels["+str(i)+"]:", output.shape[1], "height:", output.shape[2], "width:", output.shape[3])
     print("OUT_CHANNELS:", out_channels)
     print("FEATURE_MAPS:", feature_maps)
-    print("STRIDES:", [[round((300-1)/(i[0]-1)), round((300-1)/(i[1]-1))] for i in feature_maps])
+    print("STRIDES:", [[np.floor((300-1)/(i[0]-1)), np.floor((300-1)/(i[1]-1))] for i in feature_maps])
+    print("Note: Strides tror jeg ikke trenger stemme helt\n")
+    

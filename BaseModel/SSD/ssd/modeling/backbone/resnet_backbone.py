@@ -46,14 +46,16 @@ class ResNetModel(torch.nn.Module):
                 break
             x = module(x)
             out_features.append(x)
-
+            
+        # Only use 6 outputs
+        out_features = out_features[2:]
         # If we only want to check output dimensions
         if self.no_check:
             return out_features
 
         # Verify that the backbone outputs correct features.
         for idx, feature in enumerate(out_features):
-            h, w = self.output_feature_shape[idx]
+            w, h = self.output_feature_shape[idx]
             expected_shape = (self.output_channels[idx], h, w)
             # Feature.shape is (batch, channels, height, width)
             assert feature.shape[1:] == expected_shape, \

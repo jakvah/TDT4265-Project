@@ -2,23 +2,25 @@ MODEL:
     NUM_CLASSES: 5
     BACKBONE:
         NAME: 'resnet'
-        PRETRAINED: False
-    OUT_CHANNELS: [64, 64, 64, 64, 64, 128, 256, 512]        
-    INPUT_CHANNELS: 3
+        PRETRAINED: True
+        OUT_CHANNELS: [64, 64, 64, 128, 256, 512]        
+        INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [[150, 150], [150, 150], [150, 150], [75, 75], [75, 75], [38, 38], [19, 19], [10, 10]]
-        STRIDES: [[2, 2], [2, 2], [2, 2], [4, 4], [4, 4], [8, 8], [17, 17], [33, 33]        
+        FEATURE_MAPS: [[150, 150], [75, 75], [75, 75], [38, 38], [19, 19], [10,10]]
+        STRIDES: [[2, 2], [2, 2], [2, 2], [4, 4], [4, 4], [8, 8], [16,16], [33,33]]
+        # Kan endres på
+        ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
         # X, Y
-        MIN_SIZES: [[30, 30], [60, 60], [111, 111], [135,135], [162, 162], [213, 213], [238,238], [264, 264]]
+        MIN_SIZES: [[15, 15], [60, 60], [111, 111], [162, 162], [213, 213], [264, 264]]
         # X, Y
-        MAX_SIZES: [[60, 60], [111, 111],[135,135], [162, 162], [213, 213], [238,238], [264, 264], [315, 315]]
-        ASPECT_RATIOS: [[2], [2, 3], [2], [2, 3], [2, 3], [2], [2], [2]]
-        # When has 1 aspect ratio, every location has 4 boxes, 2 ratio 6 boxes.
-        # #boxes = 2 + #ratio * 2
-        BOXES_PER_LOCATION: [4, 6, 6, 4, 6, 4, 4, 4]  # number of boxes per feature map location
-        CLIP: True
+        MAX_SIZES: [[60, 60], [111, 111], [162, 162], [213, 213], [264, 264], [315, 315]]
+        # Kan ikke endres på tilfeldig, vet ikke hvordan man lager SSD med flere element i OUT_CHANNELS
+        BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+
 INPUT:
     IMAGE_SIZE: [300, 300]
+    PIXEL_MEAN: [0.485, 0.456, 0.406]
+    PIXEL_STD: [0.229, 0.224, 0.225]
 DATASETS:
     TRAIN: ("rdd2020_train",)
     TEST: ("rdd2020_val", )

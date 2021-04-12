@@ -1,5 +1,6 @@
 import torch
-from torchvision.models import resnet18
+from torch import nn
+from torchvision.models import resnet101
 
 
 class ResNetModel(torch.nn.Module):
@@ -15,17 +16,77 @@ class ResNetModel(torch.nn.Module):
      where "output_channels" is the same as cfg.BACKBONE.OUT_CHANNELS
     """
 
-    def __init__(self, cfg, no_check=False):
+    def __init__(self, cfg,):
         super().__init__()
-        self.no_check = no_check  # Only for checking output dim
+        self.check = False  # Only for checking output dim
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
-        self.resnet = resnet18(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
-        """Vi kan legge til noe før.
+        self.resnet = resnet101(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
+        
+        module1 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[2],
+                out_channels=256,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(256),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[3],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            )
+        )
 
-        """
+        module2 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[3],
+                out_channels=128,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(128),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=self.output_channels[4],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            )
+        )
+
+        module3 = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.output_channels[4],
+                out_channels=128,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(128),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=self.output_channels[5],
+                kernel_size=3,
+                stride=1,
+                padding=0
+            )
+        )
+        self.custom_net = nn.ModuleList([module1,module2,module3])
+        
+
 
     def forward(self, x):
         """
@@ -47,11 +108,29 @@ class ResNetModel(torch.nn.Module):
             x = module(x)
             out_features.append(x)
             
-        # Only use 6 outputs
-        out_features = out_features[2:]
+        # Only use 3 outputs
+        out_features = out_features[-3:]
+            
+        for custom_module in self.custom_net:
+            x = custom_module(x)
+            out_features.append(x)
+        
+
+
         # If we only want to check output dimensions
-        if self.no_check:
-            return out_features
+        if self.check:
+            import numpy as np
+            out_channels = []
+            feature_maps = []
+
+            for i, output in enumerate(out_features):
+                out_channels.append(output.shape[1])
+                feature_maps.append([output.shape[2], output.shape[3]])
+                    # print("output_channels["+str(i)+"]:", output.shape[1], "height:", output.shape[2], "width:", output.shape[3])
+            print("OUT_CHANNELS:", out_channels)
+            print("FEATURE_MAPS:", feature_maps)
+            print("STRIDES:", [[int(np.floor((300)/(i[0]))), int(np.floor((300)/(i[1])))] for i in feature_maps])
+            print("Note: Strides tror jeg ikke trenger stemme helt\n")
 
         # Verify that the backbone outputs correct features.
         for idx, feature in enumerate(out_features):
@@ -61,92 +140,3 @@ class ResNetModel(torch.nn.Module):
             assert feature.shape[1:] == expected_shape, \
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
         return tuple(out_features)
-
-        """The resnet18 layers:
-
-        ResNet(
-        (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
-        (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-        (relu): ReLU(inplace=True)
-        (maxpool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
-        (layer1): Sequential(
-            (0): BasicBlock(
-            (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-            (1): BasicBlock(
-            (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-        )
-        (layer2): Sequential(
-            (0): BasicBlock(
-            (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (downsample): Sequential(
-                (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
-                (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-            )
-            (1): BasicBlock(
-            (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-        )
-        (layer3): Sequential(
-            (0): BasicBlock(
-            (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (downsample): Sequential(
-                (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
-                (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-            )
-            (1): BasicBlock(
-            (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-        )
-        (layer4): Sequential(
-            (0): BasicBlock(
-            (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (downsample): Sequential(
-                (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
-                (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-            )
-            (1): BasicBlock(
-            (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            (relu): ReLU(inplace=True)
-            (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-            (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-            )
-        )
-        (avgpool): AdaptiveAvgPool2d(output_size=(1, 1))
-        (fc): Linear(in_features=512, out_features=1000, bias=True)
-        )
-
-        """

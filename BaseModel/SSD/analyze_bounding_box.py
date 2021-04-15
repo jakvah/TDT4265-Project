@@ -3,10 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-try:
-    f = open("./datasets/tdt4265/labels.json", 'r')
-except:
-    print("")
+
+f = open("./datasets/tdt4265/labels.json", 'r')
 bb_file = json.load(f)
 json_dict = dict(bb_file)
 df_list = []
@@ -30,7 +28,8 @@ for index in tqdm(indexes[:-1]):
         category_counter[category] += 1
     category_wh = (category_wh.T/category_counter).T
     for category in range(4):
-        df_list[category] = df_list[category].append({"width": category_wh[category, 0], "height": category_wh[category, 1]}, ignore_index=True)
+        df_list[category] = df_list[category].append(
+            {"width": category_wh[category, 0], "height": category_wh[category, 1]}, ignore_index=True)
 
 for i, df in enumerate(df_list):
     print("-----------------------------------------------------------")
@@ -45,5 +44,7 @@ for i, df in enumerate(df_list):
     df.plot.hist(ax=ax[0], alpha=0.5, bins=40)
     df.plot.scatter(x="width", y="height", ax=ax[1], alpha=0.5)
     aspect_df = pd.DataFrame({"aspect_ratio": df["width"]/df["height"]})
-    aspect_df.plot.hist(ax=ax[2], alpha=0.5, bins=40)
+    aspect_df.plot.hist(ax=ax[2], alpha=0.5, bins=80)
+    for a in ax:
+        a.grid()
     plt.show()

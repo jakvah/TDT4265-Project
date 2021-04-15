@@ -128,4 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 BaseModel/SSD/datasets/*
+BaseModel/SSD/ssd/datasets/*
+BaseModel/SSD/outputs/*
 .vscode/

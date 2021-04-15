@@ -21,33 +21,28 @@ def build_transforms(cfg, is_train=True):
 
         transform = [
             ConvertFromInts(),
-            ToPercentCoords(),
+            PhotometricDistort(),
 
 
             # Fikser the main shit
             RandomSampleCrop(),
+            RandomMirror(),
+            ToPercentCoords(),
 
             # Skalere til correct input size
             Resize(cfg.INPUT.IMAGE_SIZE),
 
             # Flipperino med 0.5 sannsynlighet
-            RandomMirror(),
+           
 
             # Fargelegge
-            A.RandomBrightnessContrast(),
-            A.ISONoise(),
-            A.RGBShift(),
+           # A.RandomBrightnessContrast(),
+            #A.ISONoise(),
+           # A.RGBShift(),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
             ToTensor(),
         ]
-        else:
-            transform = [
-                ConvertFromInts(),
-                ToPercentCoords(),
-                Resize(cfg.INPUT.IMAGE_SIZE),
-                SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
-                ToTensor(),
-            ]
+    
 
     else:
         transform = [

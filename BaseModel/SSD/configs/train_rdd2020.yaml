@@ -25,6 +25,7 @@ DATASETS:
     TRAIN: ("rdd2020_train",)
     TEST: ("rdd2020_val", )
 SOLVER:
+    LR_STEPS: [20000,25000] # Same as baseline 2
     MAX_ITER: 120000
     GAMMA: 0.1
     BATCH_SIZE: 16

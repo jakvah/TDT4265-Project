@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torchvision.models import resnet18
-
+from torchvision.models import wide_resnet50_2
 
 class ResNetModel(torch.nn.Module):
     """
@@ -25,7 +25,7 @@ class ResNetModel(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
 
         # Loading the resnet backbone
-        self.resnet = resnet18(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
+        self.resnet = wide_resnet50_2(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
 
         module1 = nn.Sequential(
             nn.ReLU(),

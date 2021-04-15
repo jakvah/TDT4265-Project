@@ -11,7 +11,6 @@ def intersect(box_a, box_b):
     inter = np.clip((max_xy - min_xy), a_min=0, a_max=np.inf)
     return inter[:, 0] * inter[:, 1]
 
-
 def jaccard_numpy(box_a, box_b):
     """Compute the jaccard overlap of two sets of boxes.  The jaccard overlap
     is simply the intersection over union of two boxes.
@@ -77,7 +76,6 @@ class Compose(object):
 class ConvertFromInts(object):
     def __call__(self, image, boxes=None, labels=None):
         return image.astype(np.float32), boxes, labels
-
 
 class SubtractMeans(object):
     def __init__(self, mean, std):
@@ -176,10 +174,12 @@ class RandomSampleCrop(object):
             for _ in range(50):
                 current_image = image
 
+
+                # Muligens endre på 0.3 tallet til 0.1?
                 w = random.uniform(0.3 * width, width)
                 h = random.uniform(0.3 * height, height)
 
-                # aspect ratio constraint b/t .5 & 2
+                # aspect ratio constraint b/t 0.5 & 2
                 if h / w < 0.5 or h / w > 2:
                     continue
 

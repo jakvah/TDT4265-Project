@@ -3,6 +3,8 @@ from .target_transform import SSDTargetTransform
 from .transforms import *
 
 import numpy as np
+import albumentations as A
+
 
 def build_transforms(cfg, is_train=True):
     if is_train:
@@ -30,6 +32,11 @@ def build_transforms(cfg, is_train=True):
 
             # Flipperino med 0.5 sannsynlighet
             RandomMirror(),
+
+            # Fargelegge
+            A.RandomBrightnessContrast(),
+            A.ISONoise(),
+            A.RGBShift(),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
             ToTensor(),
         ]

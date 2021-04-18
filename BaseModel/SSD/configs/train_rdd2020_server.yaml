@@ -3,7 +3,7 @@ MODEL:
     BACKBONE:
         NAME: 'resnet'
         PRETRAINED: True
-        OUT_CHANNELS: [ 512, 1024, 2048, 256, 128, 128]
+        OUT_CHANNELS: [512, 1024, 2048, 256, 128, 128]
         INPUT_CHANNELS: 3
     PRIORS:
         FEATURE_MAPS: [ [38, 38], [19, 19], [10, 10], [5, 5], [3, 3], [1, 1]]
@@ -15,7 +15,7 @@ MODEL:
 # #         # X, Y
         MAX_SIZES: [[30, 30], [60, 60], [162, 162], [213, 213], [264, 264], [315, 315]]
 # #         # Kan ikke endres på tilfeldig, tror man bare kan ha et gitt anatall basert på antall channels eller feature maps elns
-        BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+        BOXES_PER_LOCATION: [6, 4, 4, 6, 4, 4]
 
 INPUT:
     IMAGE_SIZE: [300, 300]
@@ -31,3 +31,5 @@ SOLVER:
     LR: 1e-3
 OUTPUT_DIR: 'outputs/rdd2020'
 DATASET_DIR: "/work/datasets"
+EVAL_STEP: 20000
+MODEL_SAVE_STEP: 200000

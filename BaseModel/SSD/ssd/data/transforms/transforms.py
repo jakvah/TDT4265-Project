@@ -3,6 +3,7 @@ import torch
 import cv2
 import numpy as np
 from numpy import random
+import albumentations as A
 
 
 def intersect(box_a, box_b):
@@ -419,3 +420,21 @@ class SwapChannels(object):
         #     image = np.array(image)
         image = image[:, :, self.swaps]
         return image
+
+
+class ImageDistortion:
+    def __init__(self):
+        # Add different distortions
+        # TODO: Change the different parameters
+        self.distort_transform = A.Compose([
+            A.ISONoise(),
+            A.RGBShift(),
+            A.RandomBrightnessContrast(),
+        ])
+
+    def __call__(self, image, boxes, labels):
+        image = image.copy()
+        # Do transform
+        im = self.distort_transform(image=image.astype(np.uint8))["image"]
+
+        return im.astype(np.float32), boxes, labels

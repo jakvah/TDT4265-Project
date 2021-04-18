@@ -37,7 +37,7 @@ class ResNetModel(torch.nn.Module):
                 padding=1
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(256),
+            # nn.BatchNorm2d(256),
             nn.Conv2d(
                 in_channels=256,
                 out_channels=self.output_channels[3],
@@ -51,15 +51,15 @@ class ResNetModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=self.output_channels[3],
-                out_channels=128,
+                out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(128),
+            # nn.BatchNorm2d(256),
             nn.Conv2d(
-                in_channels=128,
+                in_channels=256,
                 out_channels=self.output_channels[4],
                 kernel_size=3,
                 stride=2,
@@ -71,15 +71,15 @@ class ResNetModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=self.output_channels[4],
-                out_channels=128,
+                out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(128),
+            # nn.BatchNorm2d(256),
             nn.Conv2d(
-                in_channels=128,
+                in_channels=256,
                 out_channels=self.output_channels[5],
                 kernel_size=3,
                 stride=1,
@@ -110,6 +110,20 @@ class ResNetModel(torch.nn.Module):
 
         # Only use 3 outputs
         out_features = out_features[-3:]
+        # If we only want to check output dimensions
+        if self.check:
+            import numpy as np
+            out_channels = []
+            feature_maps = []
+            input_dim = (300, 300)
+            for i, output in enumerate(out_features):
+                out_channels.append(output.shape[1])
+                feature_maps.append([output.shape[2], output.shape[3]])
+            print("Configs before own network")
+            print("OUT_CHANNELS:", out_channels)
+            print("FEATURE_MAPS:", feature_maps)
+            print("STRIDES:", [[int(np.floor((input_dim[0])/(i[0]))), int(np.floor((input_dim[1])/(i[1])))] for i in feature_maps])
+
 
         for custom_module in self.custom_net:
             x = custom_module(x)
@@ -124,11 +138,10 @@ class ResNetModel(torch.nn.Module):
             for i, output in enumerate(out_features):
                 out_channels.append(output.shape[1])
                 feature_maps.append([output.shape[2], output.shape[3]])
-                # print("output_channels["+str(i)+"]:", output.shape[1], "height:", output.shape[2], "width:", output.shape[3])
+            print("Configs after own network")
             print("OUT_CHANNELS:", out_channels)
             print("FEATURE_MAPS:", feature_maps)
             print("STRIDES:", [[int(np.floor((input_dim[0])/(i[0]))), int(np.floor((input_dim[1])/(i[1])))] for i in feature_maps])
-            print("Note: Strides tror jeg ikke trenger stemme helt\n")
 
         # Verify that the backbone outputs correct features.
         for idx, feature in enumerate(out_features):

@@ -28,15 +28,12 @@ torch.backends.cudnn.benchmark = True
 # Cudnn is not deterministic by default. Set this to True if you want
 # to be sure to reproduce your results
 torch.backends.cudnn.deterministic = True
-HALF_PRECISION = True
+
 
 def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
-    
-    if HALF_PRECISION:
-        model = model.half()
 
     optimizer = torch.optim.SGD(
         model.parameters(),
@@ -45,12 +42,11 @@ def start_train(cfg):
         weight_decay=cfg.SOLVER.WEIGHT_DECAY
     )
 
-
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(
         model, optimizer, cfg.OUTPUT_DIR, save_to_disk, logger,
-        )
+    )
     extra_checkpoint_data = checkpointer.load()
     arguments.update(extra_checkpoint_data)
 

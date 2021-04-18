@@ -8,22 +8,16 @@ def num_parameters(module: torch.nn.Module):
     ])
 
 
-def to_cuda(elements, half=False):
+def to_cuda(elements):
     """
     Transfers every object in elements to GPU VRAM if available.
     elements can be a object or list/tuple of objects
     """
     if torch.cuda.is_available():
-        if half:
-            if type(elements) == tuple or type(elements) == list:
-                return [x.cuda().half() for x in elements]
-            else:
-                return elements.cuda().half()
+        if type(elements) == tuple or type(elements) == list:
+            return [x.cuda() for x in elements]
         else:
-            if type(elements) == tuple or type(elements) == list:
-                return [x.cuda() for x in elements]
-            else:
-                return elements.cuda()
+            return elements.cuda()
     return elements
 
 

@@ -33,15 +33,12 @@ class Container:
 
     def numpy(self):
         return self._call('numpy')
-    
+
     def cpu(self):
         return self._call("cpu")
-    
+
     def cuda(self):
         return self._call("cuda")
-
-    def half(self):
-        return self._call("half")
 
     def resize(self, size):
         """resize boxes

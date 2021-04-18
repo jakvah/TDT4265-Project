@@ -41,8 +41,8 @@ def do_train(cfg, model,
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
         arguments["iteration"] = iteration
-        images = torch_utils.to_cuda(images, half=True)
-        targets = torch_utils.to_cuda(targets, half=False)
+        images = torch_utils.to_cuda(images)
+        targets = torch_utils.to_cuda(targets)
         loss_dict = model(images, targets=targets)
         loss = sum(loss for loss in loss_dict.values())
 
@@ -87,7 +87,7 @@ def do_train(cfg, model,
             eval_results = do_evaluation(cfg, model, iteration=iteration)
             for eval_result, dataset in zip(eval_results, cfg.DATASETS.TEST):
                 write_metric(
-                    eval_result['metrics'], 'metrics/' + dataset,summary_writer, iteration)
+                    eval_result['metrics'], 'metrics/' + dataset, summary_writer, iteration)
             model.train()  # *IMPORTANT*: change to train mode after eval.
 
         if iteration >= cfg.SOLVER.MAX_ITER:

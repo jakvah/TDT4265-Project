@@ -429,10 +429,6 @@ class SwapChannels(object):
 
 class ImageDistortion:
     def __init__(self):
-        r = np.random.randint(3)
-
-
-
         distortions = [
             A.RGBShift(p=0.1),
             A.RandomBrightness(limit=0.5,p=0.1),

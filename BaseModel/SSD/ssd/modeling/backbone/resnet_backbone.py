@@ -51,15 +51,15 @@ class ResNetModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=self.output_channels[3],
-                out_channels=128,
+                out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(128),
+            nn.BatchNorm2d(256),
             nn.Conv2d(
-                in_channels=128,
+                in_channels=256,
                 out_channels=self.output_channels[4],
                 kernel_size=3,
                 stride=2,
@@ -71,15 +71,15 @@ class ResNetModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=self.output_channels[4],
-                out_channels=128,
+                out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
-            nn.BatchNorm2d(128),
+            nn.BatchNorm2d(256),
             nn.Conv2d(
-                in_channels=128,
+                in_channels=256,
                 out_channels=self.output_channels[5],
                 kernel_size=3,
                 stride=1,

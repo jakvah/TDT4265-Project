@@ -33,3 +33,6 @@ def build_backbone(cfg):
     if backbone_name == "resnet":
         model = ResNetModel(cfg)
         return model
+    if backbone_name == "inception":
+        model = InceptionModel(cfg)
+    

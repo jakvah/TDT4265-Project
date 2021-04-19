@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torchvision.models import resnet18
+from torchvision.models import resnet50
 
 
 class ResNetModel(torch.nn.Module):
@@ -25,7 +25,7 @@ class ResNetModel(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
 
         # Loading the resnet backbone
-        self.resnet = resnet18(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
+        self.resnet = resnet50(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
 
         module1 = nn.Sequential(
             nn.ReLU(),
@@ -110,11 +110,6 @@ class ResNetModel(torch.nn.Module):
 
         # Only use 3 outputs
         out_features = out_features[-3:]
-
-        for custom_module in self.custom_net:
-            x = custom_module(x)
-            out_features.append(x)
-
         # If we only want to check output dimensions
         if self.check:
             import numpy as np
@@ -123,12 +118,28 @@ class ResNetModel(torch.nn.Module):
             input_dim = (300, 300)
             for i, output in enumerate(out_features):
                 out_channels.append(output.shape[1])
-                feature_maps.append([output.shape[2], output.shape[3]])
-                # print("output_channels["+str(i)+"]:", output.shape[1], "height:", output.shape[2], "width:", output.shape[3])
+                feature_maps.append([output.shape[3], output.shape[2]])
             print("OUT_CHANNELS:", out_channels)
             print("FEATURE_MAPS:", feature_maps)
-            print("STRIDES:", [[int(np.floor((input_dim[0])/(i[0]))), int(np.floor((input_dim[1])/(i[1])))] for i in feature_maps])
-            print("Note: Strides tror jeg ikke trenger stemme helt\n")
+            print("STRIDES:", [[int(np.floor((input_dim[1])/(i[1]))), int(np.floor((input_dim[0])/(i[0])))] for i in feature_maps])
+
+        for custom_module in self.custom_net:
+            x = custom_module(x)
+            out_features.append(x)
+
+         # If we only want to check output dimensions
+        if self.check:
+            import numpy as np
+            out_channels = []
+            feature_maps = []
+            input_dim = (300, 300)
+            for i, output in enumerate(out_features):
+                out_channels.append(output.shape[1])
+                feature_maps.append([output.shape[3], output.shape[2]])
+            print("OUT_CHANNELS:", out_channels)
+            print("FEATURE_MAPS:", feature_maps)
+            print("STRIDES:", [[int(np.floor((input_dim[1])/(i[1]))), int(np.floor((input_dim[0])/(i[0])))] for i in feature_maps])
+
 
         # Verify that the backbone outputs correct features.
         for idx, feature in enumerate(out_features):

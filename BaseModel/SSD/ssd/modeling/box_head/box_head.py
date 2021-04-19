@@ -53,6 +53,7 @@ class BoxPredictor(nn.Module):
     """
     The class responsible for generating predictions for each prior
     """
+
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg

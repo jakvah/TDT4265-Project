@@ -16,7 +16,8 @@ def to_cuda(elements):
     if torch.cuda.is_available():
         if type(elements) == tuple or type(elements) == list:
             return [x.cuda() for x in elements]
-        return elements.cuda()
+        else:
+            return elements.cuda()
     return elements
 
 

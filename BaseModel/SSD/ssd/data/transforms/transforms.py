@@ -3,6 +3,7 @@ import torch
 import cv2
 import numpy as np
 from numpy import random
+import albumentations as A
 
 
 def intersect(box_a, box_b):
@@ -10,6 +11,7 @@ def intersect(box_a, box_b):
     min_xy = np.maximum(box_a[:, :2], box_b[:2])
     inter = np.clip((max_xy - min_xy), a_min=0, a_max=np.inf)
     return inter[:, 0] * inter[:, 1]
+
 
 def jaccard_numpy(box_a, box_b):
     """Compute the jaccard overlap of two sets of boxes.  The jaccard overlap
@@ -76,6 +78,7 @@ class Compose(object):
 class ConvertFromInts(object):
     def __call__(self, image, boxes=None, labels=None):
         return image.astype(np.float32), boxes, labels
+
 
 class SubtractMeans(object):
     def __init__(self, mean, std):
@@ -174,7 +177,6 @@ class RandomSampleCrop(object):
             for _ in range(50):
                 current_image = image
 
-
                 # Muligens endre på 0.3 tallet til 0.1?
                 w = random.uniform(0.3 * width, width)
                 h = random.uniform(0.3 * height, height)
@@ -198,7 +200,7 @@ class RandomSampleCrop(object):
 
                 # cut the crop from the image
                 current_image = current_image[rect[1]:rect[3], rect[0]:rect[2],
-                                :]
+                                              :]
 
                 # keep overlap with gt box IF center in sampled patch
                 centers = (boxes[:, :2] + boxes[:, 2:]) / 2.0
@@ -254,7 +256,7 @@ class Expand(object):
             dtype=image.dtype)
         expand_image[:, :, :] = self.mean
         expand_image[int(top):int(top + height),
-        int(left):int(left + width)] = image
+                     int(left):int(left + width)] = image
         image = expand_image
 
         boxes = boxes.copy()
@@ -273,14 +275,16 @@ class RandomMirror(object):
             boxes[:, 0::2] = width - boxes[:, 2::-2]
         return image, boxes, classes
 
+
 class Mirror(object):
     def __call__(self, image, boxes, classes):
         _, width, _ = image.shape
-        
+
         image = image[:, ::-1]
         boxes = boxes.copy()
         boxes[:, 0::2] = width - boxes[:, 2::-2]
         return image, boxes, classes
+
 
 class RandomSaturation(object):
     def __init__(self, lower=0.5, upper=1.5):
@@ -371,6 +375,7 @@ class RandomBrightness(object):
             image += delta
         return image, boxes, labels
 
+
 class PhotometricDistort(object):
     def __init__(self):
         self.pd = [
@@ -419,3 +424,21 @@ class SwapChannels(object):
         #     image = np.array(image)
         image = image[:, :, self.swaps]
         return image
+
+
+class ImageDistortion:
+    def __init__(self):
+        # Add different distortions
+        # TODO: Change the different parameters
+        self.distort_transform = A.Compose([
+            A.ISONoise(),
+            A.RGBShift(),
+            A.RandomBrightnessContrast(),
+        ])
+
+    def __call__(self, image, boxes, labels):
+        image = image.copy()
+        # Do transform
+        im = self.distort_transform(image=image.astype(np.uint8))["image"]
+
+        return im.astype(np.float32), boxes, labels

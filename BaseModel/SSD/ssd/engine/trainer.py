@@ -38,19 +38,31 @@ def do_train(cfg, model,
     start_iter = arguments["iteration"]
     start_training_time = time.time()
     end = time.time()
+    scaler = torch.cuda.amp.GradScaler()
+
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
         arguments["iteration"] = iteration
         images = torch_utils.to_cuda(images)
         targets = torch_utils.to_cuda(targets)
-        loss_dict = model(images, targets=targets)
-        loss = sum(loss for loss in loss_dict.values())
+        # Casts operations to mixed precision
+        with torch.cuda.amp.autocast():
+            loss_dict = model(images.half(), targets=targets)
+            loss = sum(loss for loss in loss_dict.values())
 
         meters.update(total_loss=loss, **loss_dict)
 
         optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        # Scales the loss, and calls backward()
+        # to create scaled gradients
+        scaler.scale(loss).backward()
+
+        # Unscales gradients and calls
+        # or skips optimizer.step()
+        scaler.step(optimizer)
+
+        # Updates the scale for next iteration
+        scaler.update()
 
         batch_time = time.time() - end
         end = time.time()
@@ -87,7 +99,7 @@ def do_train(cfg, model,
             eval_results = do_evaluation(cfg, model, iteration=iteration)
             for eval_result, dataset in zip(eval_results, cfg.DATASETS.TEST):
                 write_metric(
-                    eval_result['metrics'], 'metrics/' + dataset,summary_writer, iteration)
+                    eval_result['metrics'], 'metrics/' + dataset, summary_writer, iteration)
             model.train()  # *IMPORTANT*: change to train mode after eval.
 
         if iteration >= cfg.SOLVER.MAX_ITER:

@@ -21,28 +21,20 @@ def build_transforms(cfg, is_train=True):
 
         transform = [
             ConvertFromInts(),
-            PhotometricDistort(),
-
+            ImageDistortion(),
 
             # Fikser the main shit
             RandomSampleCrop(),
+            # Flipperino med 0.5 sannsynlighet
             RandomMirror(),
             ToPercentCoords(),
 
             # Skalere til correct input size
             Resize(cfg.INPUT.IMAGE_SIZE),
 
-            # Flipperino med 0.5 sannsynlighet
-           
-
-            # Fargelegge
-           # A.RandomBrightnessContrast(),
-            #A.ISONoise(),
-           # A.RGBShift(),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
             ToTensor(),
         ]
-    
 
     else:
         transform = [

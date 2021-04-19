@@ -1,5 +1,7 @@
 from torch import nn
 from ssd.modeling.backbone.resnet_backbone import ResNetModel
+from ssd.modeling.backbone.assignment4_backbone import ImprovedModel
+
 
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
@@ -32,4 +34,8 @@ def build_backbone(cfg):
     backbone_name = cfg.MODEL.BACKBONE.NAME
     if backbone_name == "resnet":
         model = ResNetModel(cfg)
+        return model
+
+    if backbone_name == "ass4":
+        model = ImprovedModel(cfg)
         return model

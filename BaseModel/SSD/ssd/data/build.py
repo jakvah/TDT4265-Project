@@ -35,7 +35,6 @@ def make_data_loader(cfg, is_train=True, max_iter=None, start_iter=0):
         dataset_list, transform=train_transform,
         target_transform=target_transform, is_train=is_train)
 
-
     shuffle = is_train
 
     data_loaders = []

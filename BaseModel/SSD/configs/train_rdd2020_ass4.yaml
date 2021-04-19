@@ -1,0 +1,24 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'ass4'
+        PRETRAINED: True
+        OUT_CHANNELS: [128, 256, 256, 128, 64, 64]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        MIN_SIZES: [[15, 15], [30, 30], [80, 80], [162, 162], [213, 213], [264, 264]]
+        MAX_SIZES: [[30, 30], [50, 50], [130, 130], [213, 213], [264, 264], [315, 315]]
+
+INPUT:
+    IMAGE_SIZE: [300, 300]
+DATASETS:
+    TRAIN: ("rdd2020_train",)
+    TEST: ("rdd2020_val", )
+SOLVER:
+    MAX_ITER: 15000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 1.2e-3
+    WEIGHT_DECAY: 3e-4
+OUTPUT_DIR: 'outputs/ass4'
+DATASET_DIR: "datasets"

@@ -3,6 +3,7 @@ import torch
 import cv2
 import numpy as np
 from numpy import random
+import random
 import albumentations as A
 
 
@@ -428,13 +429,19 @@ class SwapChannels(object):
 
 class ImageDistortion:
     def __init__(self):
-        # Add different distortions
-        # TODO: Change the different parameters
-        self.distort_transform = A.Compose([
-            A.ISONoise(),
-            A.RGBShift(),
-            A.RandomBrightnessContrast(),
-        ])
+        r = np.random.randint(3)
+
+
+
+        distortions = [
+            A.RGBShift(p=0.1),
+            A.RandomBrightness(limit=0.5,p=0.1),
+            A.RandomContrast(limit=0.5,p=0.1),
+        ]
+        random.shuffle(distortions)
+        total_dist =  distortions + [A.ISONoise()] 
+                
+        self.distort_transform = A.Compose(total_dist)
 
     def __call__(self, image, boxes, labels):
         image = image.copy()

@@ -48,7 +48,7 @@ def do_train(cfg, model,
     for i,_ in enumerate(model.backbone.resnet.children()):
         rand_list.append(i)
     rand_list = rand_list[:-3] # Remove first three modules
-    model.backbone.resnet.requires_grad = False
+    # model.backbone.resnet.requires_grad = False
 
     print(model)
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):

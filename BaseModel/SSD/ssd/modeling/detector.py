@@ -33,10 +33,10 @@ class SSDDetector(nn.Module):
 
 def build_backbone(cfg):
     backbone_name = cfg.MODEL.BACKBONE.NAME
-    if backbone_name == "resnet":
+    if backbone_name == "resnet_deep":
         model = ResNetModelDeep(cfg)
         return model
-    if backbone_name == "resnet_deep":
+    if backbone_name == "resnet":
         model = ResNetModel(cfg)
         return model
     if backbone_name == "ass4":

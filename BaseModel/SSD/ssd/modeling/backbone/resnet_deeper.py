@@ -30,35 +30,9 @@ class ResNetModelDeep(torch.nn.Module):
         del self.resnet.fc
 
         self.module1 = nn.Sequential(
-            nn.Conv2d(in_channels=self.output_channels[2], out_channels=256, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=256,
-                out_channels=256,
-                kernel_size=3,
-                stride=1,
-                padding=1
-            ),
-            nn.ReLU(),
-            nn.BatchNorm2d(256),
-            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=1, stride=1),
-            nn.BatchNorm2d(256),
-            nn.Conv2d(
-                in_channels=256,
-                out_channels=self.output_channels[3],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-            nn.BatchNorm2d(self.output_channels[3]),
-            nn.ReLU(),
-        )
-
-        self.module2 = nn.Sequential(
             nn.Conv2d(in_channels=self.output_channels[3], out_channels=256, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
+            nn.BatchNorm2d(256),
+            # nn.ReLU(),
             nn.Conv2d(
                 in_channels=256,
                 out_channels=256,
@@ -80,12 +54,11 @@ class ResNetModelDeep(torch.nn.Module):
             nn.BatchNorm2d(self.output_channels[4]),
             nn.ReLU(),
         )
-        
 
-        self.module3 = nn.Sequential(
+        self.module2 = nn.Sequential(
             nn.Conv2d(in_channels=self.output_channels[4], out_channels=256, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
+            nn.BatchNorm2d(256),
+            # nn.ReLU(),
             nn.Conv2d(
                 in_channels=256,
                 out_channels=256,
@@ -108,6 +81,33 @@ class ResNetModelDeep(torch.nn.Module):
             nn.ReLU(),
         )
         
+
+        self.module3 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[5], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256),
+            # nn.ReLU(),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=256,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.ReLU(),
+            nn.BatchNorm2d(256),
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[6],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            ),
+            nn.BatchNorm2d(self.output_channels[6]),
+            nn.ReLU(),
+        )
+        
     def forward(self, x):
         """
         The forward functiom should output features with shape:
@@ -126,6 +126,7 @@ class ResNetModelDeep(torch.nn.Module):
         x = self.resnet.bn1(x)
         x = self.resnet.maxpool(x)
         x = self.resnet.layer1(x)
+        out_features.append(x)
         x = self.resnet.layer2(x)
         out_features.append(x)
         x = self.resnet.layer3(x)
@@ -140,7 +141,7 @@ class ResNetModelDeep(torch.nn.Module):
         out_features.append(x)
 
         # Only use 6 outputs
-        out_features = out_features[-6:]
+        # out_features = out_features[-6:]
         # If we only want to check output dimensions
         if self.check:
             import numpy as np

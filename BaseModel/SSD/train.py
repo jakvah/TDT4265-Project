@@ -17,8 +17,8 @@ from six.moves import urllib
 opener = urllib.request.build_opener()
 opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 urllib.request.install_opener(opener)
-np.random.seed(0)
-torch.manual_seed(0)
+np.random.seed(10)
+torch.manual_seed(10)
 
 # Allow torch/cudnn to optimize/analyze the input/output shape of convolutions
 # To optimize forward/backward pass.
@@ -35,10 +35,10 @@ def start_train(cfg):
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
 
-    optimizer = torch.optim.SGD(
+    optimizer = torch.optim.Adagrad(
         model.parameters(),
         lr=cfg.SOLVER.LR,
-        momentum=cfg.SOLVER.MOMENTUM,
+        # momentum=cfg.SOLVER.MOMENTUM,
         weight_decay=cfg.SOLVER.WEIGHT_DECAY
     )
 

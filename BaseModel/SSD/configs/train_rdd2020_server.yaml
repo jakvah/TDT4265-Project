@@ -1,19 +1,21 @@
 MODEL:
+    # THRESHOLD: 0.5
     NUM_CLASSES: 5
     BACKBONE:
         NAME: 'resnet'
         PRETRAINED: True
-        OUT_CHANNELS: [ 512, 1024, 2048, 256, 128, 128]
+        OUT_CHANNELS: [512, 1024, 2048, 1024, 1024, 1024]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [ [38, 38], [19, 19], [10, 10], [5, 5], [3, 3], [1, 1]]
+        FEATURE_MAPS: [[38, 38], [19, 19], [10, 10], [5, 5], [3, 3], [1,1]]
         STRIDES: [[7, 7], [15, 15], [30, 30], [60, 60], [100, 100], [300, 300]]
+        #FEATURE_MAPS: [[64, 64], [32, 32], [16, 16], [8, 8], [4, 4], [2, 2]]
+        #STRIDES: [[4, 4], [9, 9], [18, 18], [37, 37], [75, 75], [150, 150]]
 #         # Kan endres på
         # ASPECT_RATIOS: [[7,5], [8], [1], [7, 5], [2], [2]]
 #         # X, Y
-        MIN_SIZES: [[10, 10], [30, 30], [60, 60], [162, 162], [213, 213], [264, 264]]
-# #         # X, Y
-        MAX_SIZES: [[30, 30], [60, 60], [162, 162], [213, 213], [264, 264], [315, 315]]
+        MIN_SIZES: [[15, 15], [30, 30], [80, 80], [162, 162], [213, 213], [264, 264]]
+        MAX_SIZES: [[30, 30], [50, 50], [130, 130], [213, 213], [264, 264], [315, 315]]
 # #         # Kan ikke endres på tilfeldig, tror man bare kan ha et gitt anatall basert på antall channels eller feature maps elns
         # BOXES_PER_LOCATION: [6, 4, 4, 6, 4, 4]
 INPUT:
@@ -30,4 +32,5 @@ SOLVER:
     LR: 1e-3
 OUTPUT_DIR: 'outputs/rdd2020_50'
 DATASET_DIR: "/work/datasets"
-EVAL_STEP: 2000
+EVAL_STEP: 8000
+MODEL_SAVE_STEP: 1000

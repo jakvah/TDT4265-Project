@@ -1,7 +1,7 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'resnet'
+        NAME: 'resnet_deep'
         PRETRAINED: True
         OUT_CHANNELS: [512, 1024, 2048, 512, 256, 128]
         INPUT_CHANNELS: 3
@@ -30,7 +30,7 @@ SOLVER:
     BATCH_SIZE: 16
     LR: 1e-3
     WEIGHT_DECAY: 5e-5
-OUTPUT_DIR: 'outputs/rdd2020_50'
+OUTPUT_DIR: 'outputs/rdd2020_deep_relu'
 DATASET_DIR: "/work/datasets"
 EVAL_STEP: 3000
 MODEL_SAVE_STEP: 3000

@@ -42,6 +42,9 @@ def start_train(cfg):
         weight_decay=cfg.SOLVER.WEIGHT_DECAY
     )
 
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
+                                                               T_max=int(cfg.SOLVER.MAX_ITER/1000), eta_min=0)
+    
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(
@@ -55,7 +58,7 @@ def start_train(cfg):
 
     model = do_train(
         cfg, model, train_loader, optimizer,
-        checkpointer, arguments)
+        checkpointer, arguments, scheduler)
     return model
 
 

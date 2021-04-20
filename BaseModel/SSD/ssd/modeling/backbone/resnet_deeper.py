@@ -3,7 +3,7 @@ from torch import nn
 from torchvision.models import wide_resnet50_2
 import copy
 
-class ResNetModel(torch.nn.Module):
+class ResNetModelDeep(torch.nn.Module):
     """
     This is a resnet backbone for SSD.
     The feature extractor outputs a list of 6 feature maps, with the sizes:
@@ -28,29 +28,21 @@ class ResNetModel(torch.nn.Module):
         self.resnet = wide_resnet50_2(pretrained=cfg.MODEL.BACKBONE.PRETRAINED, zero_init_residual=True)
         del self.resnet.avgpool
         del self.resnet.fc
-        # # TODO: gjør penere?
-        # res50 = resnet50(pretrained=cfg.MODEL.BACKBONE.PRETRAINED)
-        # for i in range(4):
-        #     temp = copy.deepcopy(self.resnet.layer4)
-        #     temp[2].conv3 = nn.Conv2d(512, 1024, kernel_size=(1, 1), stride=(1, 1), bias=False)
-        #     temp[2].bn3 = nn.BatchNorm2d(1024, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
-        #     self.resnet.add_module("additional_layer"+str(i+1), temp)
-        # del self.resnet.layer4
 
-        # temp = copy.deepcopy(res50.layer3)
-        # self.resnet.add_module("additional_layer1", temp)
-        # temp = copy.deepcopy(res50.layer4)
-        # del res50
         self.module1 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[2], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(512),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=self.output_channels[2],
+                in_channels=256,
                 out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(256),
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=1, stride=1),
             nn.BatchNorm2d(256),
             nn.Conv2d(
                 in_channels=256,
@@ -64,15 +56,19 @@ class ResNetModel(torch.nn.Module):
         )
 
         self.module2 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[3], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(512),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=self.output_channels[3],
+                in_channels=256,
                 out_channels=256,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
             nn.ReLU(),
+            nn.BatchNorm2d(256),
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=1, stride=1),
             nn.BatchNorm2d(256),
             nn.Conv2d(
                 in_channels=256,
@@ -87,9 +83,11 @@ class ResNetModel(torch.nn.Module):
         
 
         self.module3 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[4], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(512),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=self.output_channels[4],
+                in_channels=256,
                 out_channels=256,
                 kernel_size=3,
                 stride=1,
@@ -97,21 +95,18 @@ class ResNetModel(torch.nn.Module):
             ),
             nn.ReLU(),
             nn.BatchNorm2d(256),
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256),
             nn.Conv2d(
                 in_channels=256,
                 out_channels=self.output_channels[5],
                 kernel_size=3,
-                stride=1,
-                padding=0
+                stride=2,
+                padding=1
             ),
             nn.BatchNorm2d(self.output_channels[5]),
             nn.ReLU(),
         )
-        # self.resnet.add_module("module1", module1)
-        # self.resnet.add_module("module2", module2)
-        # self.resnet.add_module("module3", module3)
-        # self.custom_net = nn.ModuleList([module1, module2, module3])
-
         
     def forward(self, x):
         """
@@ -158,6 +153,5 @@ class ResNetModel(torch.nn.Module):
             print("OUT_CHANNELS:", out_channels)
             print("FEATURE_MAPS:", feature_maps)
             print("STRIDES:", [[int(np.floor((input_dim[1])/(i[1]))), int(np.floor((input_dim[0])/(i[0])))] for i in feature_maps])
-
 
         return tuple(out_features)

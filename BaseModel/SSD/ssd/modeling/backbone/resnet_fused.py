@@ -22,6 +22,7 @@ class ResNetModelFusion(torch.nn.Module):
         super().__init__()
         self.check = False  # Only for checking output dim
         self.scale_lr = True
+        self.base_lr = 1e-2
 
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels
@@ -169,9 +170,9 @@ class ResNetModelFusion(torch.nn.Module):
         #                                      "m2": self.module2, "m3": self.module3, "p1": self.pre_stage_fuser19, "p2": self.pre_stage_fuser38})
         self.relu = nn.ReLU(inplace=True)
 
-        self.num_layers = sum([1 for _ in self.resnet.modules()])
+        self.num_layers = sum([1 for _ in self.resnet.children()])
 
-        for i, module in enumerate(self.resnet.modules()):
+        for i, module in enumerate(self.resnet.children()):
             print(module)
             if isinstance(module, (nn.ReLU, nn.MaxPool2d, nn.BatchNorm2d)):
                 continue
@@ -183,8 +184,8 @@ class ResNetModelFusion(torch.nn.Module):
 
             # Optionally scale the learning rates to have the same total
             # distance traveled (modulo the gradients).
-            module.lr = 1e-1 / module.lr_ratio if self.scale_lr else 1e-1
-        print(self.num_layers)
+            module.lr = self.base_lr / module.lr_ratio if self.scale_lr else self.base_lr
+            print(module.lr)
 
     def fuse(self, output_38, output_19):
         out19_staged = self.resnet.p1(output_19)

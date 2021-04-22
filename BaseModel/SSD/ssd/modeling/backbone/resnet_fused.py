@@ -184,11 +184,10 @@ class ResNetModelFusion(torch.nn.Module):
             # Optionally scale the learning rates to have the same total
             # distance traveled (modulo the gradients).
             module.lr = 1e-1 / module.lr_ratio if self.scale_lr else 1e-1
-        print(self.num_layers)
 
     def fuse(self, output_38, output_19):
-        out19_staged = self.resnet.p1(output_19)
-        out38_staged = self.resnet.p2(output_38)
+        out19_staged = self.resnet.p2(output_19)
+        out38_staged = self.resnet.p1(output_38)
 
         out = out19_staged + out38_staged
 
@@ -229,7 +228,7 @@ class ResNetModelFusion(torch.nn.Module):
         out_features.append(self.relu(x+identity))
         x = self.resnet.d2(x)
         identity = x
-        x = self.resnet.m1(x)
+        x = self.resnet.m2(x)
         out_features.append(self.relu(x+identity))
         x = self.resnet.d3(x)
         identity = x

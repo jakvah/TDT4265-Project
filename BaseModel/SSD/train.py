@@ -34,30 +34,18 @@ def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
+
+    # Freeze the resnet backbone
     model.backbone.resnet.requires_grad = False
-    # model.backbone.down_module1.requires_grad = False
-    # model.backbone.down_module2.requires_grad = False
-    # model.backbone.down_module3.requires_grad = False
-    # model.backbone.module1.requires_grad = False
-    # model.backbone.module2.requires_grad = False
-    # model.backbone.module3.requires_grad = False
-
-    # model.backbone.resnet.layer2.requires_grad = False
-    # model.backbone.resnet.layer3.requires_grad = False
-    # model.backbone.resnet.layer4.requires_grad = False
-
-    # model.backbone.requires_grad = False
 
     optimizer = torch.optim.SGD(
-        filter(lambda p: p.requires_grad, model.parameters()),
+        filter(lambda p: p.requires_grad, model.parameters()), # TODO
         lr=cfg.SOLVER.LR,
         momentum=cfg.SOLVER.MOMENTUM,
-        weight_decay=cfg.SOLVER.WEIGHT_DECAY
+        weight_decay=cfg.SOLVER.WEIGHT_DECAY,
+        nesterov=True,
     )
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
-                                                               T_max=int(cfg.SOLVER.MAX_ITER/1000), eta_min=0)
-    
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(

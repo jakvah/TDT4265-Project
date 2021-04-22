@@ -178,8 +178,8 @@ class RandomSampleCrop(object):
                 current_image = image
 
                 # Muligens endre på 0.3 tallet til 0.1?
-                w = random.uniform(0.1 * width, width)
-                h = random.uniform(0.1 * height, height)
+                w = random.uniform(0.3 * width, width)
+                h = random.uniform(0.3 * height, height)
 
                 # aspect ratio constraint b/t 0.5 & 2
                 if h / w < 0.5 or h / w > 2:

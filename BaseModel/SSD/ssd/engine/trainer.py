@@ -38,8 +38,8 @@ def update_lr(model, iteration, optim):
             else:
                 for i, group in enumerate(optim.param_groups):
                     if group['layer_index'] == module.layer_index:
-                        self.optim.param_groups[i]['lr'] = (0.5*module.lr)*(1+np.cos(np.pi*iteration/module.max_iter))\
-                            if self.scale_lr else 0.05 * (1+np.cos(np.pi*iteration/module.max_iter))
+                        optim.param_groups[i]['lr'] = (0.5*module.lr)*(1+np.cos(np.pi*iteration/module.max_iter))\
+                            if model.backbone.scale_lr else 0.05 * (1+np.cos(np.pi*iteration/module.max_iter))
 
 
 def do_train(cfg, model,

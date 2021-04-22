@@ -29,7 +29,8 @@ def update_lr(model, iteration, optim):
 
             # If we have pasedd max iterations. Disable it.
             if iteration > module.max_iter:
-
+                module.active = False
+                print("Freezing module", module)
                 for i, group in enumerate(optim.param_groups):
                     if group['layer_index'] == module.layer_index:
                         optim.param_groups.remove(group)

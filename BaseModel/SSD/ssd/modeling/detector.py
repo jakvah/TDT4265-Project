@@ -1,6 +1,7 @@
 from torch import nn
 from ssd.modeling.backbone.resnet_backbone import ResNetModel
 from ssd.modeling.backbone.resnet_deeper import ResNetModelDeep
+from ssd.modeling.backbone.resnet_fused import ResNetModelFusion
 
 from ssd.modeling.backbone.assignment4_backbone import ImprovedModel
 
@@ -41,4 +42,8 @@ def build_backbone(cfg):
         return model
     if backbone_name == "ass4":
         model = ImprovedModel(cfg)
+        return model
+
+    if backbone_name == "fusion":
+        model = ResNetModelFusion(cfg)
         return model

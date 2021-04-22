@@ -21,7 +21,7 @@ def build_transforms(cfg, is_train=True):
 
         transform = [
             ConvertFromInts(),
-            # ImageDistortion(),
+            ImageDistortion(),
 
             # Fikser the main shit
             RandomSampleCrop(),

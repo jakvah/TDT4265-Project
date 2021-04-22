@@ -35,10 +35,23 @@ def start_train(cfg):
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
     model.backbone.resnet.requires_grad = False
-    optimizer = torch.optim.Adagrad(
+    # model.backbone.down_module1.requires_grad = False
+    # model.backbone.down_module2.requires_grad = False
+    # model.backbone.down_module3.requires_grad = False
+    # model.backbone.module1.requires_grad = False
+    # model.backbone.module2.requires_grad = False
+    # model.backbone.module3.requires_grad = False
+
+    # model.backbone.resnet.layer2.requires_grad = False
+    # model.backbone.resnet.layer3.requires_grad = False
+    # model.backbone.resnet.layer4.requires_grad = False
+
+    # model.backbone.requires_grad = False
+
+    optimizer = torch.optim.SGD(
         filter(lambda p: p.requires_grad, model.parameters()),
         lr=cfg.SOLVER.LR,
-        # momentum=cfg.SOLVER.MOMENTUM,
+        momentum=cfg.SOLVER.MOMENTUM,
         weight_decay=cfg.SOLVER.WEIGHT_DECAY
     )
 

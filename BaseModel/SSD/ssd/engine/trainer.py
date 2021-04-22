@@ -41,7 +41,7 @@ def do_train(cfg, model,
     end = time.time()
 
     # Init scaler for 16-bit precision training
-    # scaler = torch.cuda.amp.GradScaler()
+    scaler = torch.cuda.amp.GradScaler()
 
     # Create list used for freezing layers
     rand_list = []
@@ -62,40 +62,68 @@ def do_train(cfg, model,
         #     model.backbone.module1.requires_grad = False
         #     model.backbone.module2.requires_grad = False
         #     model.backbone.module3.requires_grad = False
+        if (iteration%150) == 0 and iteration > 1000:
+        
+            model.backbone.requires_grad = False
+
+        # if (iteration%200) == 0:
+        #     model.backbone.resnet.layer2.requires_grad = True
+        #     model.backbone.resnet.layer3.requires_grad = True
+        #     model.backbone.resnet.layer4.requires_grad = True
+
+        if (iteration%400) == 0 and iteration > 1000:
+            model.backbone.resnet.requires_grad = False
+            model.backbone.module1.requires_grad = True
+            model.backbone.module2.requires_grad = True
+            model.backbone.module3.requires_grad = True
+            model.backbone.down_module1.requires_grad = True
+            model.backbone.down_module2.requires_grad = True
+            model.backbone.down_module3.requires_grad = True
+
+        # if (iteration%300) == 0 and iteration > 3000:
+        #     model.backbone.resnet.layer2.requires_grad = True
+        #     model.backbone.resnet.layer3.requires_grad = True
+        #     model.backbone.resnet.layer4.requires_grad = True
+
+
+        
         # When 1% of the training data is used, freeze all but one layer
-        if iteration%(len(data_loader)*0.01) == 0:
-            model_gen = model.backbone.resnet.children()
-            for i in range(3):
-                next(model_gen)# Remove first three modules
-            for param, r in zip(model_gen, rand_list):
-                if r == 0:
-                    print("Not freezing", param)
-                    param.requires_grad = True
-                else:
-                    print("FREEZING", param)
-                    param.requires_grad = False
+        # if iteration%(len(data_loader)*0.01) == 0:
+        #     # model.backbone.module1.requires_grad = False
+        #     # model.backbone.module2.requires_grad = False
+        #     # model.backbone.module3.requires_grad = False
+        #     model_gen = model.backbone.resnet.children()
+        #     for i in range(3):
+        #         next(model_gen)# Remove first three modules
+        #     for param, r in zip(model_gen, rand_list):
+        #         if r == 0:
+        #             print("Not freezing", param)
+        #             param.requires_grad = True
+        #         else:
+        #             print("FREEZING", param)
+        #             param.requires_grad = False
 
         # Casts operations to mixed precision
-        # with torch.cuda.amp.autocast():
-        loss_dict = model(images, targets=targets)
-        loss = sum(loss for loss in loss_dict.values())
+        with torch.cuda.amp.autocast():
+            loss_dict = model(images.half(), targets=targets)
+            loss = sum(loss for loss in loss_dict.values())
 
         meters.update(total_loss=loss, **loss_dict)
 
         optimizer.zero_grad()
         # Scales the loss, and calls backward()
         # to create scaled gradients
-        # scaler.scale(loss).backward()
-        loss.backward()
+        scaler.scale(loss).backward()
+        # loss.backward()
         # Unscales gradients and calls
         # or skips optimizer.step()
-        # scaler.step(optimizer)
-        optimizer.step()
+        scaler.step(optimizer)
+        # optimizer.step()
         if iteration > 7000:
             scheduler.step()
 
         # Updates the scale for next iteration
-        # scaler.update()
+        scaler.update()
 
         batch_time = time.time() - end
         end = time.time()

@@ -21,6 +21,27 @@ def write_metric(eval_result, prefix, summary_writer, global_step):
             summary_writer.add_scalar(tag, value, global_step=global_step)
 
 
+def update_lr(model, iteration, optim):
+
+    for module in self.model.backbone.resnet.children():
+
+        if hasattr(module, 'active') and module.active:
+
+            # If we have pasedd max iterations. Disable it.
+            if iteration > module.max_iter:
+
+                for i, group in enumerate(optim.param_groups):
+                    if group['layer_index'] == module.layer_index:
+                        optim.param_groups.remove(group)
+
+            # If not, update the LR
+            else:
+                for i, group in enumerate(optim.param_groups):
+                    if group['layer_index'] == module.layer_index:
+                        self.optim.param_groups[i]['lr'] = (0.05/module.lr_ratio)*(1+np.cos(np.pi*iteration/module.max_iter))\
+                            if self.scale_lr else 0.05 * (1+np.cos(np.pi*iteration/module.max_iter))
+
+
 def do_train(cfg, model,
              data_loader,
              optimizer,
@@ -50,7 +71,7 @@ def do_train(cfg, model,
         arguments["iteration"] = iteration
         images = torch_utils.to_cuda(images)
         targets = torch_utils.to_cuda(targets)
-       
+
         # Casts operations to mixed precision
         with torch.cuda.amp.autocast():
             loss_dict = model(images.half(), targets=targets)
@@ -70,6 +91,7 @@ def do_train(cfg, model,
 
         # Updates the scale for next iteration
         scaler.update()
+        update_lr(model, iteration, optimizer)
 
         batch_time = time.time() - end
         end = time.time()

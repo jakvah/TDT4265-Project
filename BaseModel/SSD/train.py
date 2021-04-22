@@ -36,10 +36,10 @@ def start_train(cfg):
     model = torch_utils.to_cuda(model)
 
     # Freeze the resnet backbone
-    model.backbone.resnet.requires_grad = False
+    # model.backbone.resnet.requires_grad = False
 
     optimizer = torch.optim.SGD(
-        filter(lambda p: p.requires_grad, model.parameters()), # TODO
+        [{'params': m.parameters(), 'lr': m.lr, 'layer_index': m.layer_index} for m in model.backbone.resnet.children() if hasattr(m, 'active')],  # TODO
         lr=cfg.SOLVER.LR,
         momentum=cfg.SOLVER.MOMENTUM,
         weight_decay=cfg.SOLVER.WEIGHT_DECAY,

@@ -59,7 +59,7 @@ def start_train(cfg):
 
     model = do_train(
         cfg, model, train_loader, optimizer,
-        checkpointer, arguments, scheduler)
+        checkpointer, arguments)
     return model
 
 

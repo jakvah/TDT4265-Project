@@ -25,7 +25,7 @@ def do_train(cfg, model,
              data_loader,
              optimizer,
              checkpointer,
-             arguments, scheduler):
+             arguments):
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
     meters = MetricLogger()
@@ -45,7 +45,7 @@ def do_train(cfg, model,
 
     print(model)
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
-        rand_list = np.random.permutation(rand_list)
+        #rand_list = np.random.permutation(rand_list)
         iteration = iteration + 1
         arguments["iteration"] = iteration
         images = torch_utils.to_cuda(images)

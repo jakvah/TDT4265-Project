@@ -188,8 +188,8 @@ class ResNetModelFusion(torch.nn.Module):
             print(module.lr)
 
     def fuse(self, output_38, output_19):
-        out19_staged = self.resnet.p1(output_19)
-        out38_staged = self.resnet.p2(output_38)
+        out19_staged = self.resnet.p2(output_19)
+        out38_staged = self.resnet.p1(output_38)
 
         out = out19_staged + out38_staged
 
@@ -230,7 +230,7 @@ class ResNetModelFusion(torch.nn.Module):
         out_features.append(self.relu(x+identity))
         x = self.resnet.d2(x)
         identity = x
-        x = self.resnet.m1(x)
+        x = self.resnet.m2(x)
         out_features.append(self.relu(x+identity))
         x = self.resnet.d3(x)
         identity = x

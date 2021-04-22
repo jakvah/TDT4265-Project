@@ -23,7 +23,7 @@ def write_metric(eval_result, prefix, summary_writer, global_step):
 
 def update_lr(model, iteration, optim):
 
-    for module in self.model.backbone.resnet.children():
+    for module in model.backbone.resnet.children():
 
         if hasattr(module, 'active') and module.active:
 

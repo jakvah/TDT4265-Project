@@ -14,7 +14,7 @@ MODEL:
         # ASPECT_RATIOS: [[7,5], [8], [1], [7, 5], [2], [2]]
 #         # X, Y
         # See @367
-        MIN_SIZES: [[17, 17], [51, 51], [102, 102],o [276, 276], [363, 363], [450, 450]]
+        MIN_SIZES: [[17, 17], [51, 51], [102, 102], [276, 276], [363, 363], [450, 450]]
 # #         # X, Y
         MAX_SIZES: [[51, 51], [102, 102], [276, 276], [363, 363], [450, 450], [537, 537]]
 # #         # Kan ikke endres på tilfeldig, tror man bare kan ha et gitt anatall basert på antall channels eller feature maps elns

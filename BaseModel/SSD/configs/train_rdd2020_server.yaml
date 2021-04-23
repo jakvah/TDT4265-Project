@@ -6,18 +6,21 @@ MODEL:
         OUT_CHANNELS: [ 512, 1024, 2048, 256, 128, 128]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [ [38, 38], [19, 19], [10, 10], [5, 5], [3, 3], [1, 1]]
-        STRIDES: [[7, 7], [15, 15], [30, 30], [60, 60], [100, 100], [300, 300]]
+        FEATURE_MAPS: [ [64, 64], [32, 32], [16, 16], [8, 8], [4, 4], [2, 2]]
+
+        # See @363
+        STRIDES: [[8, 8], [16, 16], [30, 30], [64, 64], [102, 102], [512, 512]]
 #         # Kan endres på
         # ASPECT_RATIOS: [[7,5], [8], [1], [7, 5], [2], [2]]
 #         # X, Y
-        MIN_SIZES: [[10, 10], [30, 30], [60, 60], [162, 162], [213, 213], [264, 264]]
+        # See @367
+        MIN_SIZES: [[17, 17], [51, 51], [102, 102],o [276, 276], [363, 363], [450, 450]]
 # #         # X, Y
-        MAX_SIZES: [[30, 30], [60, 60], [162, 162], [213, 213], [264, 264], [315, 315]]
+        MAX_SIZES: [[51, 51], [102, 102], [276, 276], [363, 363], [450, 450], [537, 537]]
 # #         # Kan ikke endres på tilfeldig, tror man bare kan ha et gitt anatall basert på antall channels eller feature maps elns
         # BOXES_PER_LOCATION: [6, 4, 4, 6, 4, 4]
 INPUT:
-    IMAGE_SIZE: [300, 300]
+    IMAGE_SIZE: [512, 512]
     PIXEL_MEAN: [0.485, 0.456, 0.406]
     PIXEL_STD: [0.229, 0.224, 0.225]
 DATASETS:
@@ -30,4 +33,5 @@ SOLVER:
     LR: 1e-3
 OUTPUT_DIR: 'outputs/rdd2020_50'
 DATASET_DIR: "/work/datasets"
-EVAL_STEP: 2000
+EVAL_STEP: 4000
+MODEL_SAVE_STEP: 2000

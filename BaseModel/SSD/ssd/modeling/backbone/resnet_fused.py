@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torchvision.models import resnet50
+from torchvision.models import resnet34
 # import torch.nn.functional as F
 import copy
 
@@ -26,7 +26,7 @@ class ResNetModelFusion(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
 
         # Loading the resnet backbone
-        self.resnet = resnet50(pretrained=cfg.MODEL.BACKBONE.PRETRAINED, zero_init_residual=True)
+        self.resnet = resnet34(pretrained=cfg.MODEL.BACKBONE.PRETRAINED, zero_init_residual=True)
         del self.resnet.avgpool
         del self.resnet.fc
 
@@ -116,7 +116,7 @@ class ResNetModelFusion(torch.nn.Module):
         )
         self.relu = nn.ReLU(inplace=True)
 
-
+        """
         self.pre_stage_fuser19 = nn.Sequential(
             nn.ConvTranspose2d(
                 in_channels=1024,
@@ -124,6 +124,7 @@ class ResNetModelFusion(torch.nn.Module):
                 kernel_size=2,
                 stride=2,
                 padding=0,
+                dilation=1
             ),
             nn.Conv2d(
                 in_channels=512,
@@ -154,7 +155,7 @@ class ResNetModelFusion(torch.nn.Module):
 
         return self.relu(out)
 
-
+    """
         
     def forward(self, x):
         """
@@ -178,9 +179,10 @@ class ResNetModelFusion(torch.nn.Module):
 
         out_19 = self.resnet.layer3(out_38)
 
-        fused = self.fuse(out_38, out_19)
+        # fused = self.fuse(out_38, out_19)
 
-        out_features.append(fused)
+        # out_features.append(fused)
+        out_features.append(out_38)
         out_features.append(out_19)
 
         x = self.resnet.layer4(out_19)
@@ -188,16 +190,18 @@ class ResNetModelFusion(torch.nn.Module):
         x = self.down_module1(x)
         identity = x
         x = self.module1(x)
-        out_features.append(self.relu(x+identity))
+        x = self.relu(x+identity)
+        out_features.append(x)
         x = self.down_module2(x)
         identity = x
         x = self.module2(x)
-        out_features.append(self.relu(x+identity))
+        x = self.relu(x+identity)
+        out_features.append(x)
         x = self.down_module3(x)
         identity = x    
         x = self.module3(x)
-        out_features.append(self.relu(x+identity))
-
+        x = self.relu(x+identity)
+        out_features.append(x)
         
         if self.check:
             import numpy as np

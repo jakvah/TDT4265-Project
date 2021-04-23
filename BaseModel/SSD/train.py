@@ -34,18 +34,18 @@ def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
-
-    # Freeze the resnet backbone
     model.backbone.resnet.requires_grad = False
 
-    optimizer = torch.optim.SGD(
-        filter(lambda p: p.requires_grad, model.parameters()), # TODO
+    adam_optimizer = torch.optim.Adagrad(
+        filter(lambda p: p.requires_grad, model.parameters()),
         lr=cfg.SOLVER.LR,
-        momentum=cfg.SOLVER.MOMENTUM,
-        weight_decay=cfg.SOLVER.WEIGHT_DECAY,
-        nesterov=True,
+        momentum=cgf.SOLVER.MOMENTUM,
+        nesterov=True
+        # betas=(0.9, 0.98), 
+        # eps=1e-09
     )
 
+    optimizer = NoamOpt(500, 2000, adam_optimizer)
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(

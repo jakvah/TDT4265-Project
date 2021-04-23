@@ -39,11 +39,7 @@ def do_train(cfg, model,
     start_iter = arguments["iteration"]
     start_training_time = time.time()
     end = time.time()
-
-    # Init scaler for 16-bit precision training
-    scaler = torch.cuda.amp.GradScaler()
-
-    print(model)
+    # scaler = torch.cuda.amp.GradScaler()
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         rand_list = np.random.permutation(rand_list)
         iteration = iteration + 1

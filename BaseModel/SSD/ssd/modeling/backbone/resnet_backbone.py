@@ -132,7 +132,7 @@ class ResNetModel(torch.nn.Module):
             import numpy as np
             out_channels = []
             feature_maps = []
-            input_dim = (300, 300)
+            input_dim = (cfg.INPUT.IMAGE_SIZE[0], cfg.INPUT.IMAGE_SIZE[1])
             for i, output in enumerate(out_features):
                 out_channels.append(output.shape[1])
                 feature_maps.append([output.shape[3], output.shape[2]])

@@ -25,7 +25,7 @@ def do_train(cfg, model,
              data_loader,
              optimizer,
              checkpointer,
-             arguments, scheduler):
+             arguments):
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
     meters = MetricLogger()
@@ -41,31 +41,31 @@ def do_train(cfg, model,
     end = time.time()
     # scaler = torch.cuda.amp.GradScaler()
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
-        rand_list = np.random.permutation(rand_list)
+        #rand_list = np.random.permutation(rand_list)
         iteration = iteration + 1
         arguments["iteration"] = iteration
         images = torch_utils.to_cuda(images)
         targets = torch_utils.to_cuda(targets)
        
         # Casts operations to mixed precision
-        with torch.cuda.amp.autocast():
-            loss_dict = model(images.half(), targets=targets)
-            loss = sum(loss for loss in loss_dict.values())
+        # with torch.cuda.amp.autocast():
+        loss_dict = model(images, targets=targets)
+        loss = sum(loss for loss in loss_dict.values())
 
         meters.update(total_loss=loss, **loss_dict)
 
-        optimizer.zero_grad()
+        optimizer.optimizer.zero_grad()
         # Scales the loss, and calls backward()
         # to create scaled gradients
-        scaler.scale(loss).backward()
-        # loss.backward()
+        # scaler.scale(loss).backward()
+        loss.backward()
         # Unscales gradients and calls
         # or skips optimizer.step()
-        scaler.step(optimizer)
-        # optimizer.step()
+        # scaler.step(optimizer)
+        optimizer.step(iteration)
 
         # Updates the scale for next iteration
-        scaler.update()
+        # scaler.update()
 
         batch_time = time.time() - end
         end = time.time()
@@ -73,7 +73,7 @@ def do_train(cfg, model,
         if iteration % cfg.LOG_STEP == 0:
             eta_seconds = meters.time.global_avg * (max_iter - iteration)
             eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
-            lr = optimizer.param_groups[0]['lr']
+            lr = optimizer.optimizer.param_groups[0]['lr']
             to_log = [
                 f"iter: {iteration:06d}",
                 f"lr: {lr:.5f}",
@@ -92,7 +92,7 @@ def do_train(cfg, model,
                     'losses/{}'.format(loss_name), loss_item,
                     global_step=global_step)
             summary_writer.add_scalar(
-                'lr', optimizer.param_groups[0]['lr'],
+                'lr', optimizer.optimizer.param_groups[0]['lr'],
                 global_step=global_step)
 
         if iteration % cfg.MODEL_SAVE_STEP == 0:

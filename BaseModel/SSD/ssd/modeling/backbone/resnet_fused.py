@@ -20,6 +20,7 @@ class ResNetModelFusion(torch.nn.Module):
     def __init__(self, cfg,):
         super().__init__()
         self.check = False  # Only for checking output dim
+
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
@@ -30,132 +31,143 @@ class ResNetModelFusion(torch.nn.Module):
         del self.resnet.avgpool
         del self.resnet.fc
 
-        self.down_module1 = nn.Sequential(
-            nn.Conv2d(in_channels=self.output_channels[2], out_channels=512, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.ReLU(),
+        self.pre_stage_fuser38 = nn.Sequential(
             nn.Conv2d(
-                in_channels=512,
-                out_channels=self.output_channels[3],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-        )
-        self.module1 = nn.Sequential(
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[3], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.Conv2d(in_channels=self.output_channels[3], out_channels=512, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.Conv2d(
-                in_channels=512,
-                out_channels=self.output_channels[3],
+                in_channels=128,
+                out_channels=128,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
-            nn.BatchNorm2d(self.output_channels[3], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            # nn.ReLU(),
+            nn.BatchNorm2d(128),
         )
+        self.resnet.add_module("p1", self.pre_stage_fuser38)
 
-        self.down_module2 = nn.Sequential(
-            nn.Conv2d(in_channels=self.output_channels[3], out_channels=512, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=512,
-                out_channels=self.output_channels[4],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-        )
-        self.module2 = nn.Sequential(
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[4], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.Conv2d(in_channels=self.output_channels[4], out_channels=512, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.Conv2d(
-                in_channels=512,
-                out_channels=self.output_channels[4],
-                kernel_size=3,
-                stride=1,
-                padding=1
-            ),
-            nn.BatchNorm2d(self.output_channels[4], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            # nn.ReLU(),
-        )
-        
-
-        self.down_module3 = nn.Sequential(
-            nn.Conv2d(in_channels=self.output_channels[4], out_channels=512, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=512,
-                out_channels=self.output_channels[5],
-                kernel_size=3,
-                stride=2,
-                padding=1
-            ),
-        )
-        self.module3 = nn.Sequential(
-            nn.ReLU(),
-            nn.BatchNorm2d(self.output_channels[5], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.Conv2d(in_channels=self.output_channels[5], out_channels=512, kernel_size=1, stride=1),
-            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            nn.Conv2d(
-                in_channels=512,
-                out_channels=self.output_channels[5],
-                kernel_size=3,
-                stride=1,
-                padding=1
-            ),
-            nn.BatchNorm2d(self.output_channels[5], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            # nn.ReLU(),
-        )
-        self.relu = nn.ReLU(inplace=True)
-
-        """
         self.pre_stage_fuser19 = nn.Sequential(
             nn.ConvTranspose2d(
-                in_channels=1024,
-                out_channels=512,
+                in_channels=256,
+                out_channels=256,
                 kernel_size=2,
                 stride=2,
                 padding=0,
                 dilation=1
             ),
             nn.Conv2d(
-                in_channels=512,
-                out_channels=512,
+                in_channels=256,
+                out_channels=128,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
-            nn.BatchNorm2d(512),
+            nn.BatchNorm2d(128),
         )
+        self.resnet.add_module("p2", self.pre_stage_fuser19)
 
-        self.pre_stage_fuser38 = nn.Sequential(
+
+        self.down_module1 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[2], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.ReLU(),
             nn.Conv2d(
-                in_channels=512,
-                out_channels=512,
+                in_channels=256,
+                out_channels=self.output_channels[3],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            ),
+        )
+        self.resnet.add_module("d1", self.down_module1)
+
+        self.module1 = nn.Sequential(
+            nn.ReLU(),
+            nn.BatchNorm2d(self.output_channels[3], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Conv2d(in_channels=self.output_channels[3], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[3],
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
-            nn.BatchNorm2d(512),
+            nn.BatchNorm2d(self.output_channels[3], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            # nn.ReLU(),
         )
+        self.resnet.add_module("m1", self.module1)
 
-    def fuse(self,output_38, output_19):
-        out19_staged = self.pre_stage_fuser19(output_19)
-        out38_staged = self.pre_stage_fuser38(output_38)
+        self.down_module2 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[3], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[4],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            ),
+        )
+        self.resnet.add_module("d2", self.down_module2)
 
-        out = out19_staged + out38_staged
+        self.module2 = nn.Sequential(
+            nn.ReLU(),
+            nn.BatchNorm2d(self.output_channels[4], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Conv2d(in_channels=self.output_channels[4], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[4],
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.BatchNorm2d(self.output_channels[4], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            # nn.ReLU(),
+        )
+        self.resnet.add_module("m2", self.module2)
 
-        return self.relu(out)
+        self.down_module3 = nn.Sequential(
+            nn.Conv2d(in_channels=self.output_channels[4], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[5],
+                kernel_size=3,
+                stride=2,
+                padding=1
+            ),
+        )
+        self.resnet.add_module("d3", self.down_module3)
 
-    """
+        self.module3 = nn.Sequential(
+            nn.ReLU(),
+            nn.BatchNorm2d(self.output_channels[5], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Conv2d(in_channels=self.output_channels[5], out_channels=256, kernel_size=1, stride=1),
+            nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=self.output_channels[5],
+                kernel_size=3,
+                stride=1,
+                padding=1
+            ),
+            nn.BatchNorm2d(self.output_channels[5], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+            # nn.ReLU(),
+        )
+        self.resnet.add_module("m3", self.module3)
+
+        self.relu = nn.ReLU()
+
+
+    # def fuse(self, output_38, output_19):
+    #     out19_staged = self.resnet.p2(output_19)
+    #     out38_staged = self.resnet.p1(output_38)
+
+    #     out = out19_staged + out38_staged
+
+    #     return self.relu(out)
+
         
     def forward(self, x):
         """
@@ -180,26 +192,29 @@ class ResNetModelFusion(torch.nn.Module):
         out_19 = self.resnet.layer3(out_38)
 
         # fused = self.fuse(out_38, out_19)
+        out19_staged = self.resnet.p2(out_19)
+        x = self.resnet.p1(out_38)
 
-        # out_features.append(fused)
-        out_features.append(out_38)
+        x = self.relu(out19_staged + x)
+
+        out_features.append(x)
         out_features.append(out_19)
 
         x = self.resnet.layer4(out_19)
         out_features.append(x)
-        x = self.down_module1(x)
+        x = self.resnet.d1(x)
         identity = x
-        x = self.module1(x)
+        x = self.resnet.m1(x)
         x = self.relu(x+identity)
         out_features.append(x)
-        x = self.down_module2(x)
+        x = self.resnet.d2(x)
         identity = x
-        x = self.module2(x)
+        x = self.resnet.m2(x)
         x = self.relu(x+identity)
         out_features.append(x)
-        x = self.down_module3(x)
-        identity = x    
-        x = self.module3(x)
+        x = self.resnet.d3(x)
+        identity = x
+        x = self.resnet.m3(x)
         x = self.relu(x+identity)
         out_features.append(x)
         
@@ -207,7 +222,7 @@ class ResNetModelFusion(torch.nn.Module):
             import numpy as np
             out_channels = []
             feature_maps = []
-            input_dim = (300, 300)
+            input_dim = (cfg.INPUT.IMAGE_SIZE[0], cfg.INPUT.IMAGE_SIZE[1])
             for i, output in enumerate(out_features):
                 out_channels.append(output.shape[1])
                 feature_maps.append([output.shape[3], output.shape[2]])

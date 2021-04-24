@@ -56,8 +56,11 @@ class NoamOpt:
         
     def step(self,iter_num):
         "Update parameters and rate"
-        self._step += 1
-        rate = self.rate(step=iter_num)
+        if 2000 < iter_num < 30000:
+            rate = 1e-3
+        else:
+            self._step += 1
+            rate = self.rate(step=iter_num)
         for p in self.optimizer.param_groups:
             p['lr'] = rate
         self._rate = rate
@@ -65,10 +68,8 @@ class NoamOpt:
         
     def rate(self, step = None):
         "Implement `lrate` above"
-        if step is None:
-            step = self._step
         return (self.model_size ** (-0.5) *
-            min(step ** (-0.5), step * self.warmup ** (-1.5))) 
+            min(self._step ** (-0.5), self._step  * self.warmup ** (-1.5))) 
 
 
 
@@ -76,18 +77,18 @@ def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
-    model.backbone.resnet.requires_grad = False
+    # model.backbone.resnet.requires_grad = False
 
-    adam_optimizer = torch.optim.Adagrad(
+    optimizer = torch.optim.SGD(
         filter(lambda p: p.requires_grad, model.parameters()),
-        lr=cfg.SOLVER.LR,
-        momentum=cgf.SOLVER.MOMENTUM,
-        nesterov=True
-        # betas=(0.9, 0.98), 
-        # eps=1e-09
+        lr=1e-4,
+        momentum=cfg.SOLVER.MOMENTUM,
+        weight_decay=cfg.SOLVER.WEIGHT_DECAY,
+        nesterov=True,
     )
-
-    optimizer = NoamOpt(500, 2000, adam_optimizer)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
+                                                               T_max=int(cfg.SOLVER.MAX_ITER/1000), eta_min=0)
+    #optimizer = NoamOpt(500, 2000, optimizer)
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(
@@ -101,7 +102,7 @@ def start_train(cfg):
 
     model = do_train(
         cfg, model, train_loader, optimizer,
-        checkpointer, arguments)
+        checkpointer, arguments, scheduler)
     return model
 
 

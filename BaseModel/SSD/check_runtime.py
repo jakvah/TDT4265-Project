@@ -65,6 +65,7 @@ def main():
 
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
+    cfg.TEST.BATCH_SIZE = 1
     cfg.freeze()
 
     logger = setup_logger("SSD", cfg.OUTPUT_DIR)
@@ -80,4 +81,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -3,22 +3,21 @@ MODEL:
     BACKBONE:
         NAME: 'resnet'
         PRETRAINED: True
-        OUT_CHANNELS: [64, 64, 64, 128, 256, 512]        
+        OUT_CHANNELS: [ 512, 1024, 2048, 256, 128, 128]
         INPUT_CHANNELS: 3
-    PRIORS:
-        FEATURE_MAPS: [[150, 150], [75, 75], [75, 75], [38, 38], [19, 19], [10,10]]
-        STRIDES: [[2, 2], [2, 2], [2, 2], [4, 4], [4, 4], [8, 8], [16,16], [33,33]]
-        # Kan endres på
-        ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
-        # X, Y
-        MIN_SIZES: [[15, 15], [60, 60], [111, 111], [162, 162], [213, 213], [264, 264]]
-        # X, Y
-        MAX_SIZES: [[60, 60], [111, 111], [162, 162], [213, 213], [264, 264], [315, 315]]
-        # Kan ikke endres på tilfeldig, vet ikke hvordan man lager SSD med flere element i OUT_CHANNELS
-        BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+        
+    PRIORS:        
+        FEATURE_MAPS: [[90, 51], [45, 26], [23, 13], [12, 7], [6, 4], [4, 2]]
 
+        # See @363
+        STRIDES: [[8, 8], [16, 16], [32, 31], [60, 57], [120, 101], [240, 405]]
+
+        # See @367
+        MIN_SIZES: [[24, 13], [72, 40], [142, 80], [387, 217], [510, 286], [631, 355]]
+        MAX_SIZES: [[72, 40], [142, 80], [387, 217], [510, 286], [631, 355], [754, 424]]
+        # BOXES_PER_LOCATION: [6, 4, 4, 6, 4, 4]
 INPUT:
-    IMAGE_SIZE: [300, 300]
+    IMAGE_SIZE: [720, 405]
     PIXEL_MEAN: [0.485, 0.456, 0.406]
     PIXEL_STD: [0.229, 0.224, 0.225]
 DATASETS:
@@ -29,5 +28,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-OUTPUT_DIR: 'outputs/tdt4265'
-DATASET_DIR: "datasets"
+OUTPUT_DIR: 'outputs/tdt_4265_50'
+DATASET_DIR: "ssd/data/datasets"
+EVAL_STEP: 6000
+MODEL_SAVE_STEP: 2000

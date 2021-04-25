@@ -19,7 +19,7 @@ class ResNetModelFusion(torch.nn.Module):
 
     def __init__(self, cfg,):
         super().__init__()
-        self.check = False  # Only for checking output dim
+        self.check = True  # Only for checking output dim
 
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels

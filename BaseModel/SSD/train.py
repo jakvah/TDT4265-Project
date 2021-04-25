@@ -81,7 +81,7 @@ def start_train(cfg):
 
     optimizer = torch.optim.SGD(
         filter(lambda p: p.requires_grad, model.parameters()),
-        lr=1e-4,
+        lr=1e-3,
         momentum=cfg.SOLVER.MOMENTUM,
         weight_decay=cfg.SOLVER.WEIGHT_DECAY,
         nesterov=True,

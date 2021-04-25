@@ -29,59 +29,16 @@ torch.backends.cudnn.benchmark = True
 # to be sure to reproduce your results
 torch.backends.cudnn.deterministic = True
 
-# LR scheduler
-class NoamOpt:
-    "Optim wrapper that implements rate."
-    def __init__(self, model_size, warmup, optimizer):
-        self.optimizer = optimizer
-        self._step = 0
-        self.warmup = warmup
-        self.model_size = model_size
-        self._rate = 0
-    
-    def state_dict(self):
-        """Returns the state of the warmup scheduler as a :class:`dict`.
-        It contains an entry for every variable in self.__dict__ which
-        is not the optimizer.
-        """
-        return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
-    
-    def load_state_dict(self, state_dict):
-        """Loads the warmup scheduler's state.
-        Arguments:
-            state_dict (dict): warmup scheduler state. Should be an object returned
-                from a call to :meth:`state_dict`.
-        """
-        self.__dict__.update(state_dict) 
-        
-    def step(self,iter_num):
-        "Update parameters and rate"
-        if 2000 < iter_num < 30000:
-            rate = 1e-3
-        else:
-            self._step += 1
-            rate = self.rate(step=iter_num)
-        for p in self.optimizer.param_groups:
-            p['lr'] = rate
-        self._rate = rate
-        self.optimizer.step()
-        
-    def rate(self, step = None):
-        "Implement `lrate` above"
-        return (self.model_size ** (-0.5) *
-            min(self._step ** (-0.5), self._step  * self.warmup ** (-1.5))) 
-
 
 
 def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     model = SSDDetector(cfg)
     model = torch_utils.to_cuda(model)
-    # model.backbone.resnet.requires_grad = False
 
     optimizer = torch.optim.SGD(
         filter(lambda p: p.requires_grad, model.parameters()),
-        lr=1e-3,
+        lr=lr.SOLVER.LR,
         momentum=cfg.SOLVER.MOMENTUM,
         weight_decay=cfg.SOLVER.WEIGHT_DECAY,
         nesterov=True,

@@ -19,7 +19,7 @@ class ResNetModelFusion(torch.nn.Module):
 
     def __init__(self, cfg,):
         super().__init__()
-        self.check = True  # Only for checking output dim
+        self.check = False  # Only for checking output dim
 
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels
@@ -91,7 +91,6 @@ class ResNetModelFusion(torch.nn.Module):
                 padding=1
             ),
             nn.BatchNorm2d(self.output_channels[3], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            # nn.ReLU(),
         )
         self.resnet.add_module("m1", self.module1)
 
@@ -122,7 +121,6 @@ class ResNetModelFusion(torch.nn.Module):
                 padding=1
             ),
             nn.BatchNorm2d(self.output_channels[4], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            # nn.ReLU(),
         )
         self.resnet.add_module("m2", self.module2)
 
@@ -153,20 +151,11 @@ class ResNetModelFusion(torch.nn.Module):
                 padding=1
             ),
             nn.BatchNorm2d(self.output_channels[5], eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
-            # nn.ReLU(),
         )
         self.resnet.add_module("m3", self.module3)
 
         self.relu = nn.ReLU()
 
-
-    # def fuse(self, output_38, output_19):
-    #     out19_staged = self.resnet.p2(output_19)
-    #     out38_staged = self.resnet.p1(output_38)
-
-    #     out = out19_staged + out38_staged
-
-    #     return self.relu(out)
 
         
     def forward(self, x):
@@ -187,20 +176,20 @@ class ResNetModelFusion(torch.nn.Module):
         x = self.resnet.bn1(x)
         x = self.resnet.maxpool(x)
         x = self.resnet.layer1(x)
-        out_38 = self.resnet.layer2(x)
-        out_19 = self.resnet.layer3(out_38)
+        out_l2 = self.resnet.layer2(x)
+        out_l3 = self.resnet.layer3(out_l2)
+        
+        # pass in to the "fuser"
+        out_l3_staged = self.resnet.p2(out_l3)
+        x = self.resnet.p1(out_l2)
 
-        # fused = self.fuse(out_38, out_19)
-        out19_staged = self.resnet.p2(out_19)
-        x = self.resnet.p1(out_38)
-
-        x = self.relu(out19_staged + x)
+        x = self.relu(out_l3_staged + x)
+        # append the fused layer
         out_features.append(x)
+        # append the output from layer 3
+        out_features.append(out_l3)
 
-        out_features.append(out_19)
-        # out_features.append(out19_staged)
-
-        x = self.resnet.layer4(out_19)
+        x = self.resnet.layer4(out_l3)
         out_features.append(x)
         x = self.resnet.d1(x)
         identity = x

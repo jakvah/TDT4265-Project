@@ -4,13 +4,13 @@ MODEL:
     BACKBONE:
         NAME: 'fusion'
         PRETRAINED: True
-        OUT_CHANNELS: [128, 256, 512, 512, 256, 128]
+        OUT_CHANNELS: [512, 1024, 2048, 512, 256, 128]
         INPUT_CHANNELS: 3
     PRIORS:
         # FEATURE_MAPS: [[38, 38], [19, 19], [10, 10], [5, 5], [3, 3],[2,2]]
         # STRIDES: [[7, 7], [15, 15], [30, 30], [60, 60], [100, 100], [150,150]]
         FEATURE_MAPS: [[64, 64], [32, 32], [16, 16], [8, 8], [4, 4], [2,2]]
-        STRIDES: [[8, 8], [16, 16], [30, 30], [64, 64], [102, 102], [256, 256]]
+        STRIDES: [[8, 8], [16, 16], [32, 32], [64, 64], [128, 128], [256, 256]]
 #         # Kan endres på
         # ASPECT_RATIOS: [[7,5], [8], [1], [4], [7, 5], [2], [2]]
         # ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
@@ -32,7 +32,7 @@ SOLVER:
     BATCH_SIZE: 16
     LR: 1e-3
     WEIGHT_DECAY: 5e-5
-OUTPUT_DIR: 'outputs/rdd2020_fusion_shallow_sgd'
+OUTPUT_DIR: 'outputs/rdd2020_fusion_shallow_sgd_50'
 DATASET_DIR: "/work/datasets"
 EVAL_STEP: 5000
 MODEL_SAVE_STEP: 5000

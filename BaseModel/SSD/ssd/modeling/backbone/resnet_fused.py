@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from torchvision.models import resnet34
+from torchvision.models import resnet50
 # import torch.nn.functional as F
 import copy
 
@@ -25,41 +25,41 @@ class ResNetModelFusion(torch.nn.Module):
         self.output_channels = output_channels
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
-
+        self.cfg = cfg
         # Loading the resnet backbone
-        self.resnet = resnet34(pretrained=cfg.MODEL.BACKBONE.PRETRAINED, zero_init_residual=True)
+        self.resnet = resnet50(pretrained=cfg.MODEL.BACKBONE.PRETRAINED, zero_init_residual=True)
         del self.resnet.avgpool
         del self.resnet.fc
 
         self.pre_stage_fuser38 = nn.Sequential(
             nn.Conv2d(
-                in_channels=128,
-                out_channels=128,
+                in_channels=512,
+                out_channels=512,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
-            nn.BatchNorm2d(128),
+            nn.BatchNorm2d(512),
         )
         self.resnet.add_module("p1", self.pre_stage_fuser38)
 
         self.pre_stage_fuser19 = nn.Sequential(
             nn.ConvTranspose2d(
-                in_channels=256,
-                out_channels=256,
+                in_channels=1024,
+                out_channels=512,
                 kernel_size=2,
                 stride=2,
                 padding=0,
                 dilation=1
             ),
             nn.Conv2d(
-                in_channels=256,
-                out_channels=128,
+                in_channels=512,
+                out_channels=512,
                 kernel_size=3,
                 stride=1,
                 padding=1
             ),
-            nn.BatchNorm2d(128),
+            nn.BatchNorm2d(512),
         )
         self.resnet.add_module("p2", self.pre_stage_fuser19)
 
@@ -188,7 +188,6 @@ class ResNetModelFusion(torch.nn.Module):
         x = self.resnet.maxpool(x)
         x = self.resnet.layer1(x)
         out_38 = self.resnet.layer2(x)
-
         out_19 = self.resnet.layer3(out_38)
 
         # fused = self.fuse(out_38, out_19)
@@ -196,9 +195,10 @@ class ResNetModelFusion(torch.nn.Module):
         x = self.resnet.p1(out_38)
 
         x = self.relu(out19_staged + x)
-
         out_features.append(x)
+
         out_features.append(out_19)
+        # out_features.append(out19_staged)
 
         x = self.resnet.layer4(out_19)
         out_features.append(x)
@@ -222,7 +222,7 @@ class ResNetModelFusion(torch.nn.Module):
             import numpy as np
             out_channels = []
             feature_maps = []
-            input_dim = (cfg.INPUT.IMAGE_SIZE[0], cfg.INPUT.IMAGE_SIZE[1])
+            input_dim = (self.cfg.INPUT.IMAGE_SIZE[0], self.cfg.INPUT.IMAGE_SIZE[1])
             for i, output in enumerate(out_features):
                 out_channels.append(output.shape[1])
                 feature_maps.append([output.shape[3], output.shape[2]])

@@ -39,6 +39,7 @@ def do_train(cfg, model,
     start_training_time = time.time()
     end = time.time()
     scaler = torch.cuda.amp.GradScaler()
+    print(model)
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         #rand_list = np.random.permutation(rand_list)
         iteration = iteration + 1
@@ -65,7 +66,7 @@ def do_train(cfg, model,
 
         # Updates the scale for next iteration
         scaler.update()
-        if iteration > 8000:
+        if iteration > 5000:
             scheduler.step()
 
         batch_time = time.time() - end

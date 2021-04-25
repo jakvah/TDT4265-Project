@@ -19,12 +19,11 @@ def write_metric(eval_result, prefix, summary_writer, global_step):
         else:
             summary_writer.add_scalar(tag, value, global_step=global_step)
 
-
 def do_train(cfg, model,
              data_loader,
              optimizer,
              checkpointer,
-             arguments):
+             arguments, scheduler):
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
     meters = MetricLogger()
@@ -39,12 +38,13 @@ def do_train(cfg, model,
     start_training_time = time.time()
     end = time.time()
     scaler = torch.cuda.amp.GradScaler()
-
+    print(model)
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
         arguments["iteration"] = iteration
         images = torch_utils.to_cuda(images)
         targets = torch_utils.to_cuda(targets)
+       
         # Casts operations to mixed precision
         with torch.cuda.amp.autocast():
             loss_dict = model(images.half(), targets=targets)
@@ -56,13 +56,16 @@ def do_train(cfg, model,
         # Scales the loss, and calls backward()
         # to create scaled gradients
         scaler.scale(loss).backward()
-
+        # loss.backward()
         # Unscales gradients and calls
         # or skips optimizer.step()
         scaler.step(optimizer)
+        # optimizer.step(iteration)
 
         # Updates the scale for next iteration
         scaler.update()
+        if iteration > 5000:
+            scheduler.step()
 
         batch_time = time.time() - end
         end = time.time()

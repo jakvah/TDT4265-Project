@@ -41,7 +41,6 @@ def do_train(cfg, model,
     scaler = torch.cuda.amp.GradScaler()
     print(model)
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
-        #rand_list = np.random.permutation(rand_list)
         iteration = iteration + 1
         arguments["iteration"] = iteration
         images = torch_utils.to_cuda(images)

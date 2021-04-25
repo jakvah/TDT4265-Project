@@ -45,7 +45,6 @@ def start_train(cfg):
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
                                                                T_max=int(cfg.SOLVER.MAX_ITER/1000), eta_min=0)
-    #optimizer = NoamOpt(500, 2000, optimizer)
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(

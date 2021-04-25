@@ -5,22 +5,19 @@ MODEL:
         PRETRAINED: True
         OUT_CHANNELS: [ 512, 1024, 2048, 256, 128, 128]
         INPUT_CHANNELS: 3
-    PRIORS:
-        FEATURE_MAPS: [ [64, 64], [32, 32], [16, 16], [8, 8], [4, 4], [2, 2]]
+        
+    PRIORS:        
+        FEATURE_MAPS: [[90, 51], [45, 26], [23, 13], [12, 7], [6, 4], [4, 2]]
 
         # See @363
-        STRIDES: [[8, 8], [16, 16], [30, 30], [64, 64], [102, 102], [512, 512]]
-#         # Kan endres på
-        # ASPECT_RATIOS: [[7,5], [8], [1], [7, 5], [2], [2]]
-#         # X, Y
+        STRIDES: [[8, 8], [16, 16], [32, 31], [60, 57], [120, 101], [240, 405]]
+
         # See @367
-        MIN_SIZES: [[17, 17], [51, 51], [102, 102], [276, 276], [363, 363], [450, 450]]
-# #         # X, Y
-        MAX_SIZES: [[51, 51], [102, 102], [276, 276], [363, 363], [450, 450], [537, 537]]
-# #         # Kan ikke endres på tilfeldig, tror man bare kan ha et gitt anatall basert på antall channels eller feature maps elns
+        MIN_SIZES: [[24, 13], [72, 40], [142, 80], [387, 217], [510, 286], [631, 355]]
+        MAX_SIZES: [[72, 40], [142, 80], [387, 217], [510, 286], [631, 355], [754, 424]]
         # BOXES_PER_LOCATION: [6, 4, 4, 6, 4, 4]
 INPUT:
-    IMAGE_SIZE: [512, 512]
+    IMAGE_SIZE: [720, 405]
     PIXEL_MEAN: [0.485, 0.456, 0.406]
     PIXEL_STD: [0.229, 0.224, 0.225]
 DATASETS:
@@ -33,5 +30,5 @@ SOLVER:
     LR: 1e-3
 OUTPUT_DIR: 'outputs/tdt_4265_50'
 DATASET_DIR: "ssd/data/datasets"
-EVAL_STEP: 4000
+EVAL_STEP: 6000
 MODEL_SAVE_STEP: 2000

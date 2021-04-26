@@ -27,5 +27,5 @@ python train.py configs/<config_name>
 where ```<config_name>``` is replaced by one of the following:
 
 - ```train_tdt4265.yaml``` for training the first model on the Norwegian dataset (given you have access).
-- ```train_tdt4265.yaml``` for training the first model on the RDD2020 dataset.
-- ```train_tdt4265.yaml``` for training the Fused SSD on the RDD2020 dataset.
+- ```train_rdd2020_server.yaml``` for training the first model on the RDD2020 dataset.
+- ```train_rdd2020_fused_ssd_server.yaml``` for training the Fused SSD on the RDD2020 dataset.

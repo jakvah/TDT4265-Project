@@ -36,12 +36,14 @@ def start_train(cfg):
     model = torch_utils.to_cuda(model)
 
     optimizer = torch.optim.SGD(
-        model.parameters(),
+        filter(lambda p: p.requires_grad, model.parameters()),
         lr=cfg.SOLVER.LR,
         momentum=cfg.SOLVER.MOMENTUM,
-        weight_decay=cfg.SOLVER.WEIGHT_DECAY
+        weight_decay=cfg.SOLVER.WEIGHT_DECAY,
+        nesterov=True,
     )
-
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,
+                                                               T_max=int(cfg.SOLVER.MAX_ITER/1000), eta_min=0)
     arguments = {"iteration": 0}
     save_to_disk = True
     checkpointer = CheckPointer(
@@ -55,7 +57,7 @@ def start_train(cfg):
 
     model = do_train(
         cfg, model, train_loader, optimizer,
-        checkpointer, arguments)
+        checkpointer, arguments, scheduler)
     return model
 
 

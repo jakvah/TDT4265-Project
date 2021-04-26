@@ -1,0 +1,29 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'fused'
+        PRETRAINED: True
+        OUT_CHANNELS: [512, 1024, 2048, 512, 256, 128]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [[64, 64], [32, 32], [16, 16], [8, 8], [4, 4], [2,2]]
+        STRIDES: [[8, 8], [16, 16], [32, 32], [64, 64], [128, 128], [256, 256]]
+        MIN_SIZES: [[17, 17], [51, 51], [102, 102], [276, 276], [363, 363], [225, 225]]
+        MAX_SIZES: [[51, 51], [102, 102], [276, 276], [363, 363], [225, 225], [269, 269]]
+
+INPUT:
+    IMAGE_SIZE: [512, 512]
+    PIXEL_MEAN: [0.485, 0.456, 0.406]
+    PIXEL_STD: [0.229, 0.224, 0.225]
+DATASETS:
+    TRAIN: ("rdd2020_train",)
+    TEST: ("rdd2020_val", )
+SOLVER:
+    MAX_ITER: 120000
+    BATCH_SIZE: 16
+    LR: 1e-3
+    WEIGHT_DECAY: 5e-5  
+OUTPUT_DIR: 'outputs/rdd2020_fused_ssd'
+DATASET_DIR: "/work/datasets"
+EVAL_STEP: 5000
+MODEL_SAVE_STEP: 20000
